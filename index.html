@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exposed Visualls — Marketing & Automação</title>
+    <meta
+      name="description"
+      content="Exposed Visualls é uma agência de marketing e softwares de automação. Criamos marcas impossíveis de ignorar e sistemas que trabalham por você."
+    />
+    <meta name="theme-color" content="#07070a" />
+    <meta property="og:title" content="Exposed Visualls — Marketing & Automação" />
+    <meta
+      property="og:description"
+      content="Marcas impossíveis de ignorar e sistemas que trabalham por você — 24 horas por dia."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Ativa os estados iniciais das animações só quando o JS está disponível -->
+    <script>
+      document.documentElement.classList.add('js')
+    </script>
+  </head>
+
+  <body>
+    <!-- Preloader -->
+    <div class="loader" aria-hidden="true">
+      <div class="loader__inner">
+        <span class="loader__brand">Exposed Visualls</span>
+        <span class="loader__count"><span data-loader-count>0</span>%</span>
+      </div>
+      <div class="loader__bar"><span></span></div>
+    </div>
+
+    <!-- Cena 3D (three.js) fixa atrás do conteúdo -->
+    <canvas class="webgl" aria-hidden="true"></canvas>
+    <div class="webgl-fallback" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- Cursor customizado (apenas desktop) -->
+    <div class="cursor" aria-hidden="true">
+      <div class="cursor__ring"><span class="cursor__label"></span></div>
+      <div class="cursor__dot"></div>
+    </div>
+
+    <header class="header">
+      <a href="#inicio" class="header__logo" aria-label="Exposed Visualls — início">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>Exposed<span class="header__logo-light"> Visualls</span></span>
+      </a>
+      <nav class="header__nav" aria-label="Principal">
+        <a href="#sobre">Sobre</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#processo">Processo</a>
+        <a href="#cases">Cases</a>
+      </nav>
+      <a href="#contato" class="btn btn--small" data-magnetic>Fale conosco</a>
+    </header>
+
+    <div id="smooth-wrapper">
+      <div id="smooth-content">
+        <main>
+          <!-- 00 — HERO -->
+          <section class="hero" id="inicio" data-scene="hero">
+            <div class="hero__top" data-speed="0.85">
+              <p class="eyebrow">Agência de marketing <span class="dot"></span> Softwares de automação</p>
+            </div>
+
+            <h1 class="hero__title" aria-label="Exposed Visualls">
+              <span class="hero__line" data-hero-line>Exposed</span>
+              <span class="hero__line hero__line--outline" data-hero-line>Visualls</span>
+            </h1>
+
+            <div class="hero__bottom">
+              <p class="hero__lead" data-hero-fade>
+                Criamos marcas impossíveis de ignorar e sistemas que trabalham por você — 24 horas por dia.
+              </p>
+              <div class="hero__actions" data-hero-fade>
+                <a href="#cases" class="btn" data-magnetic>Ver projetos</a>
+                <a href="#contato" class="btn btn--ghost" data-magnetic>Iniciar projeto</a>
+              </div>
+            </div>
+
+            <div class="hero__scroll" data-hero-fade>
+              <span>Role para explorar</span>
+              <span class="hero__scroll-line"></span>
+            </div>
+          </section>
+
+          <!-- 01 — MANIFESTO -->
+          <section class="manifesto" id="sobre" data-scene="manifesto">
+            <div class="container manifesto__grid">
+              <p class="label">(01) Manifesto</p>
+              <p class="manifesto__text" data-words>
+                Acreditamos que uma marca forte precisa ser vista — e que crescimento de verdade precisa ser
+                automatizado. Unimos criatividade, dados e tecnologia para expor o melhor do seu negócio e
+                transformar atenção em resultado.
+              </p>
+            </div>
+          </section>
+
+          <!-- 02 — MARKETING -->
+          <section class="services services--marketing" id="servicos" data-scene="marketing">
+            <div class="container services__grid services__grid--reverse">
+              <div class="services__head">
+                <p class="label">(02) Marketing</p>
+                <h2 class="title" data-lines>Visibilidade que converte.</h2>
+                <p class="services__intro" data-reveal>
+                  Estratégia, criação e mídia trabalhando juntas para colocar sua marca na frente das pessoas
+                  certas — e manter ela lá.
+                </p>
+              </div>
+              <ol class="services__list">
+                <li class="service" data-service>
+                  <span class="service__index">01</span>
+                  <div>
+                    <h3 class="service__title">Branding & Identidade Visual</h3>
+                    <p>Posicionamento, naming, identidade e design system para marcas que querem ser lembradas.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">02</span>
+                  <div>
+                    <h3 class="service__title">Tráfego Pago & Performance</h3>
+                    <p>Campanhas em Meta, Google e TikTok guiadas por dados, testes e otimização contínua.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">03</span>
+                  <div>
+                    <h3 class="service__title">Conteúdo & Social Media</h3>
+                    <p>Estratégia editorial, produção audiovisual e gestão de comunidade nas redes.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">04</span>
+                  <div>
+                    <h3 class="service__title">Sites & Landing Pages</h3>
+                    <p>Experiências web rápidas, animadas e pensadas do primeiro pixel à conversão.</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </section>
+
+          <!-- 03 — AUTOMAÇÃO -->
+          <section class="services services--automation" data-scene="automation">
+            <div class="container services__grid">
+              <div class="services__head">
+                <p class="label">(03) Automação</p>
+                <h2 class="title" data-lines>Sistemas que trabalham por você.</h2>
+                <p class="services__intro" data-reveal>
+                  Softwares e automações sob medida que eliminam tarefas repetitivas, conectam suas ferramentas
+                  e escalam a operação sem aumentar a equipe.
+                </p>
+              </div>
+              <ol class="services__list">
+                <li class="service" data-service>
+                  <span class="service__index">01</span>
+                  <div>
+                    <h3 class="service__title">Chatbots & WhatsApp</h3>
+                    <p>Atendimento, qualificação e vendas automatizadas, 24/7, integradas ao seu funil.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">02</span>
+                  <div>
+                    <h3 class="service__title">CRM & Funis Automatizados</h3>
+                    <p>Implantação de CRM com réguas de nutrição, follow-up automático e distribuição de leads.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">03</span>
+                  <div>
+                    <h3 class="service__title">Integrações & APIs</h3>
+                    <p>Conectamos seus sistemas para eliminar planilhas, retrabalho e processos manuais.</p>
+                  </div>
+                </li>
+                <li class="service" data-service>
+                  <span class="service__index">04</span>
+                  <div>
+                    <h3 class="service__title">Dashboards & BI</h3>
+                    <p>Indicadores em tempo real para decisões rápidas e baseadas em dados.</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </section>
+
+          <!-- Faixa animada (velocidade reage ao scroll) -->
+          <div class="marquee" aria-hidden="true">
+            <div class="marquee__row" data-marquee="1">
+              <div class="marquee__track">
+                <span>Branding</span><i>✦</i><span>Performance</span><i>✦</i><span>Social Media</span><i>✦</i>
+                <span>Web</span><i>✦</i><span>Chatbots</span><i>✦</i><span>CRM</span><i>✦</i>
+                <span>Integrações</span><i>✦</i><span>BI</span><i>✦</i>
+              </div>
+            </div>
+            <div class="marquee__row marquee__row--outline" data-marquee="-1">
+              <div class="marquee__track">
+                <span>Estratégia</span><i>✦</i><span>Criatividade</span><i>✦</i><span>Dados</span><i>✦</i>
+                <span>Tecnologia</span><i>✦</i><span>Resultado</span><i>✦</i><span>Escala</span><i>✦</i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 — PROCESSO (scroll horizontal fixado) -->
+          <section class="process" id="processo" data-scene="process">
+            <div class="process__head container">
+              <p class="label">(04) Processo</p>
+              <h2 class="title" data-lines>Do diagnóstico à escala.</h2>
+            </div>
+            <div class="process__viewport">
+              <div class="process__track">
+                <article class="step">
+                  <span class="step__index">01</span>
+                  <h3 class="step__title">Diagnóstico</h3>
+                  <p>Imersão no seu negócio, público e concorrência. Mapeamos gargalos e oportunidades reais.</p>
+                </article>
+                <article class="step">
+                  <span class="step__index">02</span>
+                  <h3 class="step__title">Estratégia</h3>
+                  <p>Plano de marca, mídia e automação com metas claras, prazos e indicadores mensuráveis.</p>
+                </article>
+                <article class="step">
+                  <span class="step__index">03</span>
+                  <h3 class="step__title">Execução</h3>
+                  <p>Criação, desenvolvimento e implantação em sprints ágeis, com entregas visíveis toda semana.</p>
+                </article>
+                <article class="step">
+                  <span class="step__index">04</span>
+                  <h3 class="step__title">Escala</h3>
+                  <p>Monitoramos, otimizamos e automatizamos para crescer sem inflar custos e equipe.</p>
+                </article>
+              </div>
+            </div>
+            <div class="process__progress container" aria-hidden="true">
+              <span class="process__progress-bar"></span>
+            </div>
+          </section>
+
+          <!-- 05 — CASES
+               EXEMPLOS: substitua títulos, textos, métricas e capas pelos cases reais da Exposed Visualls. -->
+          <section class="work" id="cases" data-scene="work">
+            <div class="container">
+              <div class="work__head">
+                <p class="label">(05) Projetos selecionados</p>
+                <h2 class="title" data-lines>Cases</h2>
+              </div>
+
+              <div class="work__grid">
+                <a href="#contato" class="case" data-case data-cursor="Ver case">
+                  <div class="case__media">
+                    <div class="case__img case__img--1" data-parallax><span>EV</span></div>
+                  </div>
+                  <div class="case__meta">
+                    <span class="tag">Branding</span><span class="tag">Campanha</span>
+                    <span class="case__metric">+180% alcance</span>
+                  </div>
+                  <h3 class="case__title">Rebranding & lançamento — Varejo de moda</h3>
+                </a>
+
+                <a href="#contato" class="case case--offset" data-case data-cursor="Ver case">
+                  <div class="case__media">
+                    <div class="case__img case__img--2" data-parallax><span>⌘</span></div>
+                  </div>
+                  <div class="case__meta">
+                    <span class="tag">Chatbot</span><span class="tag">CRM</span>
+                    <span class="case__metric">−60% tempo de resposta</span>
+                  </div>
+                  <h3 class="case__title">Funil automatizado no WhatsApp — Educação</h3>
+                </a>
+
+                <a href="#contato" class="case" data-case data-cursor="Ver case">
+                  <div class="case__media">
+                    <div class="case__img case__img--3" data-parallax><span>↗</span></div>
+                  </div>
+                  <div class="case__meta">
+                    <span class="tag">Tráfego pago</span><span class="tag">Criativos</span>
+                    <span class="case__metric">4,2× ROAS</span>
+                  </div>
+                  <h3 class="case__title">Performance para e-commerce</h3>
+                </a>
+
+                <a href="#contato" class="case case--offset" data-case data-cursor="Ver case">
+                  <div class="case__media">
+                    <div class="case__img case__img--4" data-parallax><span>◎</span></div>
+                  </div>
+                  <div class="case__meta">
+                    <span class="tag">Integrações</span><span class="tag">BI</span>
+                    <span class="case__metric">12 h/semana economizadas</span>
+                  </div>
+                  <h3 class="case__title">Dashboard de operações — Logística</h3>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <!-- 06 — NÚMEROS (EXEMPLOS: substitua pelos números reais) -->
+          <section class="stats" data-scene="stats">
+            <div class="container stats__grid">
+              <div class="stat">
+                <span class="stat__value">+<span data-count="120">120</span></span>
+                <span class="stat__label">projetos entregues</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value"><span data-count="98">98</span>%</span>
+                <span class="stat__label">de clientes satisfeitos</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value">+<span data-count="40">40</span></span>
+                <span class="stat__label">automações em operação</span>
+              </div>
+              <div class="stat">
+                <span class="stat__value">24/7</span>
+                <span class="stat__label">sistemas trabalhando por você</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 07 — CONTATO
+               Atualize o e-mail, o número de WhatsApp e as redes sociais. -->
+          <section class="contact" id="contato" data-scene="contact">
+            <div class="container contact__inner">
+              <p class="label">(06) Contato</p>
+              <h2 class="contact__title" data-lines>Vamos expor<br />sua marca?</h2>
+              <p class="contact__lead" data-reveal>
+                Conte sobre o seu projeto. Respondemos em até 24 horas úteis.
+              </p>
+              <a href="mailto:contato@exposedvisualls.com" class="contact__cta" data-magnetic data-cursor="Vamos!">
+                <span>Iniciar<br />projeto</span>
+              </a>
+              <ul class="contact__links">
+                <li><a href="mailto:contato@exposedvisualls.com">contato@exposedvisualls.com</a></li>
+                <li><a href="https://wa.me/5500000000000" target="_blank" rel="noopener">WhatsApp</a></li>
+                <li><a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a></li>
+                <li><a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></li>
+              </ul>
+            </div>
+          </section>
+        </main>
+
+        <footer class="footer">
+          <div class="container footer__inner">
+            <span class="footer__brand"><span class="logo-mark" aria-hidden="true"></span>Exposed Visualls</span>
+            <span>© <span data-year>2026</span> Exposed Visualls. Todos os direitos reservados.</span>
+            <a href="#inicio" class="footer__top">Voltar ao topo ↑</a>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
