@@ -1,24 +1,17 @@
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollSmoother } from 'gsap/ScrollSmoother'
 
 /** Scroll suave (GSAP ScrollSmoother) + navegação por âncoras. */
 export default class SmoothScroll {
-  constructor({ reducedMotion = false, onScroll } = {}) {
+  constructor({ reducedMotion = false } = {}) {
     this.smoother = reducedMotion
       ? null
       : ScrollSmoother.create({
           wrapper: '#smooth-wrapper',
           content: '#smooth-content',
-          smooth: 1.2,
+          smooth: 1,
           smoothTouch: 0.1,
           effects: true,
         })
-
-    ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: (self) => onScroll?.(self.scroll(), self.getVelocity()),
-    })
 
     this.bindAnchors()
   }
@@ -37,6 +30,8 @@ export default class SmoothScroll {
   }
 
   scrollTo(target) {
+    this.lock(false)
+
     if (this.smoother) {
       this.smoother.scrollTo(target, true, 'top top')
       return
@@ -46,7 +41,7 @@ export default class SmoothScroll {
     window.scrollTo({ top: y, behavior: 'auto' })
   }
 
-  /** Trava o scroll (usado durante o preloader). */
+  /** Trava o scroll (usado pelo menu do celular). */
   lock(locked) {
     if (this.smoother) this.smoother.paused(locked)
     document.documentElement.style.overflow = locked ? 'hidden' : ''

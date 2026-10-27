@@ -7,169 +7,182 @@ export default class SectionAnimations {
     this.state = state
     this.reducedMotion = reducedMotion
 
-    this.setHeader()
+    // Seções fixadas primeiro: elas empurram as posições das demais
+    if (!reducedMotion) {
+      this.setForces()
+      this.setProcess()
+    }
+
+    this.setContact()
     if (reducedMotion) return
 
-    this.setProcess()
-    this.setServices()
-    this.setMarquee()
-    this.setCases()
+    this.setFeatures()
+    this.setTiles()
     this.setStats()
   }
 
-  /** Header: ganha fundo depois do hero e se esconde ao rolar para baixo. */
-  setHeader() {
-    const header = document.querySelector('.header')
-    ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: (self) => {
-        const y = self.scroll()
-        header.classList.toggle('is-scrolled', y > 80)
-        header.classList.toggle('is-hidden', self.direction === 1 && y > 400)
-      },
-    })
+  /**
+   * "Duas forças": a seção fica fixada enquanto os dois traços do símbolo se
+   * separam (marketing × automação) e depois se reencontram girando.
+   */
+  setForces() {
+    const section = document.querySelector('.forces')
+    if (!section) return
+
+    const left = section.querySelector('.forces__caption--left')
+    const right = section.querySelector('.forces__caption--right')
+    const titleA = section.querySelector('.forces__title--a')
+    const titleB = section.querySelector('.forces__title--b')
+
+    gsap
+      .timeline({
+        defaults: { ease: 'power2.inOut' },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '+=220%',
+          pin: true,
+          scrub: 0.8,
+          refreshPriority: 2,
+        },
+      })
+      .fromTo(titleA, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0)
+      .fromTo(this.state, { split: 0 }, { split: 1, duration: 1, immediateRender: false }, 0.2)
+      .fromTo(left, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5 }, 0.6)
+      .fromTo(right, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.5 }, 0.7)
+      .to([left, right], { opacity: 0, duration: 0.4 }, 1.8)
+      .to(titleA, { opacity: 0, y: -30, duration: 0.4 }, 1.8)
+      .to(this.state, { split: 0, duration: 1 }, 1.9)
+      .fromTo(this.state, { orbit: 0 }, { orbit: Math.PI * 2, duration: 1.1, immediateRender: false }, 1.9)
+      .fromTo(titleB, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 2.3)
+      .to({}, { duration: 0.3 })
   }
 
-  /** Processo: seção fixada com scroll horizontal; o objeto 3D gira junto. */
+  /** Processo: cards em scroll horizontal com indicador de pontos. */
   setProcess() {
     const section = document.querySelector('.process')
     const track = section?.querySelector('.process__track')
     if (!track) return
 
+    const dots = [...section.querySelectorAll('.dots span')]
     const distance = () => Math.max(0, track.scrollWidth - window.innerWidth)
-    const end = () => `+=${distance()}`
+    const setActive = (progress) => {
+      const index = Math.min(dots.length - 1, Math.round(progress * (dots.length - 1)))
+      dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index))
+    }
+    setActive(0)
 
-    this.processTween = gsap.to(track, {
+    gsap.to(track, {
       x: () => -distance(),
       ease: 'none',
       scrollTrigger: {
         trigger: section,
         start: 'top top',
-        end,
+        end: () => `+=${distance()}`,
         pin: true,
         scrub: 0.6,
         invalidateOnRefresh: true,
         refreshPriority: 1,
+        onUpdate: (self) => setActive(self.progress),
       },
     })
 
-    gsap.to(section.querySelector('.process__progress-bar'), {
-      scaleX: 1,
-      ease: 'none',
-      scrollTrigger: { trigger: section, start: 'top top', end, scrub: 0.6 },
-    })
+    gsap.fromTo(
+      this.state,
+      { orbit: Math.PI * 2 },
+      {
+        orbit: Math.PI * 4,
+        ease: 'none',
+        immediateRender: false,
+        scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: 1.2 },
+      },
+    )
 
-    gsap.to(this.state, {
-      orbit: Math.PI * 1.5,
-      ease: 'none',
-      scrollTrigger: { trigger: section, start: 'top top', end, scrub: 1.5 },
-    })
-
-    const steps = section.querySelectorAll('.step')
-    gsap.from(steps, {
-      y: 100,
+    gsap.from(section.querySelectorAll('.card'), {
+      y: 80,
       opacity: 0,
-      duration: 1.3,
-      ease: 'expo.out',
-      stagger: 0.12,
-      scrollTrigger: { trigger: section, start: 'top 65%', toggleActions: 'play none none reverse' },
-    })
-
-    // Profundidade: o número de cada etapa desliza mais devagar que o card
-    steps.forEach((step) => {
-      gsap.fromTo(
-        step.querySelector('.step__index'),
-        { xPercent: 30 },
-        {
-          xPercent: -30,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: step,
-            containerAnimation: this.processTween,
-            start: 'left right',
-            end: 'right left',
-            scrub: true,
-          },
-        },
-      )
+      duration: 1.1,
+      ease: 'power3.out',
+      stagger: 0.08,
+      scrollTrigger: { trigger: section, start: 'top 70%', toggleActions: 'play none none reverse' },
     })
   }
 
-  setServices() {
-    document.querySelectorAll('.services__list').forEach((list) => {
-      gsap.from(list.querySelectorAll('[data-service]'), {
-        y: 60,
+  setFeatures() {
+    document.querySelectorAll('.feature .list').forEach((list) => {
+      gsap.from(list.querySelectorAll('[data-item]'), {
+        y: 40,
         opacity: 0,
-        duration: 1.1,
-        ease: 'expo.out',
-        stagger: 0.1,
-        scrollTrigger: { trigger: list, start: 'top 80%', toggleActions: 'play none none reverse' },
+        duration: 1,
+        ease: 'power3.out',
+        stagger: 0.08,
+        scrollTrigger: { trigger: list, start: 'top 82%', toggleActions: 'play none none reverse' },
       })
     })
   }
 
-  /** Faixas infinitas: a velocidade e a direção reagem ao scroll. */
-  setMarquee() {
-    const rows = [...document.querySelectorAll('[data-marquee]')].map((row) => {
-      const track = row.querySelector('.marquee__track')
-      row.appendChild(track.cloneNode(true))
-      return { row, direction: Number(row.dataset.marquee) || 1, x: 0, set: gsap.quickSetter(row, 'xPercent') }
-    })
-    if (!rows.length) return
-
-    let boost = 0
-    let scrollDirection = 1
-    ScrollTrigger.create({
-      onUpdate: (self) => {
-        scrollDirection = self.direction
-        boost = Math.min(Math.abs(self.getVelocity()) / 400, 8)
-      },
+  /** Bento: os tiles crescem levemente ao entrar e as ilustrações se montam. */
+  setTiles() {
+    gsap.set('[data-tile]', { opacity: 0 })
+    ScrollTrigger.batch('[data-tile]', {
+      start: 'top 88%',
+      onEnter: (tiles) =>
+        gsap.fromTo(
+          tiles,
+          { opacity: 0, y: 60, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: 'power3.out', stagger: 0.1, overwrite: true },
+        ),
     })
 
-    const wrap = gsap.utils.wrap(-50, 0)
-    gsap.ticker.add((_, deltaTime) => {
-      const dt = Math.min(deltaTime, 100) / 1000
-      boost *= 0.92
-      rows.forEach((item) => {
-        item.x = wrap(item.x - dt * 2.2 * item.direction * scrollDirection * (1 + boost))
-        item.set(item.x)
-      })
-    })
-  }
+    const once = (trigger, animation) =>
+      ScrollTrigger.create({ trigger, start: 'top 75%', once: true, onEnter: () => animation.play() })
 
-  setCases() {
-    document.querySelectorAll('[data-case]').forEach((card) => {
-      gsap.from(card, {
-        y: 120,
-        opacity: 0,
-        duration: 1.4,
-        ease: 'expo.out',
-        scrollTrigger: { trigger: card, start: 'top 92%', toggleActions: 'play none none reverse' },
-      })
-
-      const media = card.querySelector('.case__media')
-      gsap.fromTo(
-        card.querySelector('[data-parallax]'),
-        { yPercent: -9 },
-        {
-          yPercent: 9,
-          ease: 'none',
-          scrollTrigger: { trigger: media, start: 'top bottom', end: 'bottom top', scrub: true },
-        },
+    const chat = document.querySelector('.visual--chat')
+    if (chat) {
+      once(
+        chat,
+        gsap.from(chat.querySelectorAll('.bubble'), {
+          paused: true,
+          y: 16,
+          scale: 0.9,
+          opacity: 0,
+          duration: 0.6,
+          ease: 'back.out(1.6)',
+          stagger: 0.35,
+        }),
       )
-    })
+    }
+
+    const line = document.querySelector('.chart__line')
+    if (line) {
+      const length = line.getTotalLength()
+      gsap.set(line, { strokeDasharray: length, strokeDashoffset: length })
+      once(
+        line.closest('.visual'),
+        gsap
+          .timeline({ paused: true })
+          .to(line, { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut' })
+          .from('.chart__area', { opacity: 0, duration: 1 }, 0.8),
+      )
+    }
+
+    const bars = document.querySelectorAll('.visual--bars span')
+    if (bars.length) {
+      once(
+        bars[0].parentElement,
+        gsap.from(bars, { paused: true, scaleY: 0, duration: 1.1, ease: 'power3.out', stagger: 0.06 }),
+      )
+    }
   }
 
   setStats() {
     document.querySelectorAll('[data-count]').forEach((element) => {
-      const value = Number(element.dataset.count)
       gsap.fromTo(
         element,
         { textContent: 0 },
         {
-          textContent: value,
-          duration: 2,
+          textContent: Number(element.dataset.count),
+          duration: 1.8,
           ease: 'power2.out',
           snap: { textContent: 1 },
           scrollTrigger: { trigger: element, start: 'top 90%', once: true },
@@ -177,13 +190,44 @@ export default class SectionAnimations {
       )
     })
 
-    gsap.from('.stat', {
-      y: 50,
+    gsap.from('[data-stat]', {
+      y: 40,
       opacity: 0,
-      duration: 1.2,
-      ease: 'expo.out',
-      stagger: 0.1,
+      duration: 1.1,
+      ease: 'power3.out',
+      stagger: 0.08,
       scrollTrigger: { trigger: '.stats', start: 'top 80%', toggleActions: 'play none none reverse' },
+    })
+  }
+
+  /**
+   * Contato: um fundo preto fixo (atrás do canvas) acompanha a seção, então o
+   * símbolo 3D aparece sobre o preto. A navegação fica escura por cima dela.
+   */
+  setContact() {
+    const contact = document.querySelector('.contact')
+    const backdrop = document.querySelector('.backdrop')
+    const nav = document.querySelector('.nav')
+    if (!contact || !backdrop) return
+
+    let last = ''
+    gsap.ticker.add(() => {
+      const rect = contact.getBoundingClientRect()
+      const height = window.innerHeight
+      const top = Math.min(Math.max(rect.top, 0), height)
+      const bottom = Math.min(Math.max(height - rect.bottom, 0), height)
+      const clip = `inset(${top.toFixed(1)}px 0 ${bottom.toFixed(1)}px 0)`
+      if (clip !== last) {
+        backdrop.style.clipPath = clip
+        last = clip
+      }
+    })
+
+    ScrollTrigger.create({
+      trigger: contact,
+      start: 'top 48px',
+      end: 'bottom 48px',
+      toggleClass: { targets: nav, className: 'nav--dark' },
     })
   }
 }

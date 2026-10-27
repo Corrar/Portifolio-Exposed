@@ -1,7 +1,7 @@
 import { gsap } from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 
-/** Revelações de texto com SplitText (linhas, palavras e caracteres). */
+/** Revelações de texto com SplitText. */
 export default class TextAnimations {
   constructor({ reducedMotion = false } = {}) {
     this.reducedMotion = reducedMotion
@@ -14,35 +14,29 @@ export default class TextAnimations {
   }
 
   setHero() {
-    this.heroLines = document.querySelectorAll('[data-hero-line]')
-    this.heroSplits = [...this.heroLines].map((line) =>
-      SplitText.create(line, { type: 'chars', mask: 'chars', charsClass: 'split-char' }),
-    )
-    this.heroChars = this.heroSplits.map((split) => split.chars)
+    this.heroSplit = SplitText.create('.hero__title', { type: 'lines', mask: 'lines', linesClass: 'split-line' })
+    gsap.set('[data-intro-line]', { opacity: 1 })
+    gsap.set(this.heroSplit.lines, { yPercent: 105 })
+    gsap.set('[data-intro]', { opacity: 0, y: 24 })
 
-    gsap.set(this.heroChars.flat(), { yPercent: 110 })
-    gsap.set('[data-hero-fade], .hero__top .eyebrow, .header', { opacity: 0, y: 24 })
-
-    // Ao sair do hero, as duas linhas do título se afastam
-    const hero = document.querySelector('.hero')
-    gsap
-      .timeline({
-        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-      })
-      .to(this.heroLines[0], { xPercent: -18, opacity: 0.1, ease: 'none' }, 0)
-      .to(this.heroLines[1], { xPercent: 18, opacity: 0.1, ease: 'none' }, 0)
+    // Ao rolar, o conteúdo do hero recua e some (como nas páginas de produto da Apple)
+    gsap.to('.hero__content', {
+      opacity: 0,
+      y: -60,
+      scale: 0.96,
+      ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: '55% top', scrub: true },
+    })
   }
 
-  /** Entrada do hero, tocada logo depois do preloader. */
+  /** Entrada do hero, tocada assim que as fontes carregam. */
   playIntro() {
     if (this.reducedMotion) return gsap.timeline()
 
     return gsap
-      .timeline()
-      .to(this.heroChars[0], { yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.045 }, 0)
-      .to(this.heroChars[1], { yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.045 }, 0.12)
-      .to('.hero__top .eyebrow, .header', { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out' }, 0.5)
-      .to('[data-hero-fade]', { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1 }, 0.7)
+      .timeline({ delay: 0.15 })
+      .to(this.heroSplit.lines, { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12 }, 0)
+      .to('[data-intro]', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.08 }, 0.15)
   }
 
   /** Títulos: cada linha sobe por trás de uma máscara. */
@@ -55,32 +49,31 @@ export default class TextAnimations {
         autoSplit: true,
         onSplit: (self) =>
           gsap.from(self.lines, {
-            yPercent: 110,
-            duration: 1.3,
+            yPercent: 105,
+            duration: 1.1,
             ease: 'expo.out',
             stagger: 0.1,
-            scrollTrigger: { trigger: element, start: 'top 85%', toggleActions: 'play none none reverse' },
+            scrollTrigger: { trigger: element, start: 'top 86%', toggleActions: 'play none none reverse' },
           }),
       })
     })
   }
 
-  /** Manifesto: as palavras "acendem" conforme o scroll. */
+  /** Manifesto: as palavras passam de cinza-claro para preto conforme o scroll. */
   setWords() {
     document.querySelectorAll('[data-words]').forEach((element) => {
       SplitText.create(element, {
         type: 'words',
-        wordsClass: 'split-word',
         autoSplit: true,
         onSplit: (self) =>
           gsap.fromTo(
             self.words,
-            { opacity: 0.12 },
+            { color: '#d2d2d7' },
             {
-              opacity: 1,
+              color: '#1d1d1f',
               ease: 'none',
               stagger: 0.1,
-              scrollTrigger: { trigger: element, start: 'top 80%', end: 'bottom 50%', scrub: true },
+              scrollTrigger: { trigger: element, start: 'top 78%', end: 'bottom 45%', scrub: true },
             },
           ),
       })
@@ -90,11 +83,11 @@ export default class TextAnimations {
   setReveals() {
     document.querySelectorAll('[data-reveal]').forEach((element) => {
       gsap.from(element, {
-        y: 40,
+        y: 30,
         opacity: 0,
-        duration: 1.2,
-        ease: 'expo.out',
-        scrollTrigger: { trigger: element, start: 'top 88%', toggleActions: 'play none none reverse' },
+        duration: 1.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: element, start: 'top 90%', toggleActions: 'play none none reverse' },
       })
     })
   }

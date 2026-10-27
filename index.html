@@ -6,341 +6,359 @@
     <title>Exposed Visualls — Marketing & Automação</title>
     <meta
       name="description"
-      content="Exposed Visualls é uma agência de marketing e softwares de automação. Criamos marcas impossíveis de ignorar e sistemas que trabalham por você."
+      content="Exposed Visualls é uma agência de marketing e softwares de automação. Sua marca, exposta. Seu negócio, no automático."
     />
-    <meta name="theme-color" content="#07070a" />
+    <meta name="theme-color" content="#ffffff" />
     <meta property="og:title" content="Exposed Visualls — Marketing & Automação" />
-    <meta
-      property="og:description"
-      content="Marcas impossíveis de ignorar e sistemas que trabalham por você — 24 horas por dia."
-    />
+    <meta property="og:description" content="Sua marca, exposta. Seu negócio, no automático." />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <!-- Em aparelhos Apple a fonte do sistema (SF Pro) é usada; nos demais, Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap" rel="stylesheet" />
 
-    <!-- Ativa os estados iniciais das animações só quando o JS está disponível -->
     <script>
       document.documentElement.classList.add('js')
     </script>
   </head>
 
   <body>
-    <!-- Preloader -->
-    <div class="loader" aria-hidden="true">
-      <div class="loader__inner">
-        <span class="loader__brand">Exposed Visualls</span>
-        <span class="loader__count"><span data-loader-count>0</span>%</span>
-      </div>
-      <div class="loader__bar"><span></span></div>
-    </div>
+    <!-- Símbolo da marca (reutilizado via <use>) -->
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="ev-violet" gradientUnits="userSpaceOnUse" x1="4" y1="4" x2="58" y2="85">
+          <stop offset="0" stop-color="#bd8cf6" />
+          <stop offset="1" stop-color="#9a60ee" />
+        </linearGradient>
+        <linearGradient id="ev-blue" gradientUnits="userSpaceOnUse" x1="4" y1="116" x2="58" y2="35">
+          <stop offset="0" stop-color="#2bc4e6" />
+          <stop offset="1" stop-color="#5b9ef0" />
+        </linearGradient>
+        <linearGradient id="ev-icon" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#9a60ee" />
+          <stop offset="1" stop-color="#2bb8e0" />
+        </linearGradient>
+        <symbol id="ev-mark" viewBox="0 0 63 120">
+          <polyline points="56,4 4,4 51.5,85.4 58.7,73.7" stroke="url(#ev-violet)" vector-effect="non-scaling-stroke" />
+          <polyline points="57,116 4,116 51.5,34.5 58.7,46.1" stroke="url(#ev-blue)" vector-effect="non-scaling-stroke" />
+        </symbol>
+      </defs>
+    </svg>
 
-    <!-- Cena 3D (three.js) fixa atrás do conteúdo -->
+    <!-- Cena 3D (three.js) -->
+    <div class="backdrop" aria-hidden="true"></div>
     <canvas class="webgl" aria-hidden="true"></canvas>
-    <div class="webgl-fallback" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
 
-    <!-- Cursor customizado (apenas desktop) -->
-    <div class="cursor" aria-hidden="true">
-      <div class="cursor__ring"><span class="cursor__label"></span></div>
-      <div class="cursor__dot"></div>
-    </div>
+    <header class="nav">
+      <div class="nav__inner">
+        <a href="#inicio" class="lockup lockup--nav" aria-label="Exposed Visualls — início">
+          <svg class="mark" aria-hidden="true"><use href="#ev-mark" /></svg>
+          <span class="lockup__type" aria-hidden="true"><span>EX</span><span>POSED</span></span>
+        </a>
+        <nav class="nav__links" aria-label="Principal">
+          <a href="#sobre">Sobre</a>
+          <a href="#marketing">Marketing</a>
+          <a href="#automacao">Automação</a>
+          <a href="#processo">Processo</a>
+          <a href="#cases">Cases</a>
+        </nav>
+        <a href="#contato" class="pill pill--small nav__cta">Fale conosco</a>
+        <button class="nav__toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
+          <span></span><span></span>
+        </button>
+      </div>
+    </header>
 
-    <header class="header">
-      <a href="#inicio" class="header__logo" aria-label="Exposed Visualls — início">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span>Exposed<span class="header__logo-light"> Visualls</span></span>
-      </a>
-      <nav class="header__nav" aria-label="Principal">
+    <div class="menu" id="menu" aria-hidden="true">
+      <nav class="menu__links" aria-label="Menu">
         <a href="#sobre">Sobre</a>
-        <a href="#servicos">Serviços</a>
+        <a href="#marketing">Marketing</a>
+        <a href="#automacao">Automação</a>
         <a href="#processo">Processo</a>
         <a href="#cases">Cases</a>
+        <a href="#contato">Contato</a>
       </nav>
-      <a href="#contato" class="btn btn--small" data-magnetic>Fale conosco</a>
-    </header>
+    </div>
 
     <div id="smooth-wrapper">
       <div id="smooth-content">
         <main>
-          <!-- 00 — HERO -->
+          <!-- HERO -->
           <section class="hero" id="inicio" data-scene="hero">
-            <div class="hero__top" data-speed="0.85">
-              <p class="eyebrow">Agência de marketing <span class="dot"></span> Softwares de automação</p>
-            </div>
-
-            <h1 class="hero__title" aria-label="Exposed Visualls">
-              <span class="hero__line" data-hero-line>Exposed</span>
-              <span class="hero__line hero__line--outline" data-hero-line>Visualls</span>
-            </h1>
-
-            <div class="hero__bottom">
-              <p class="hero__lead" data-hero-fade>
-                Criamos marcas impossíveis de ignorar e sistemas que trabalham por você — 24 horas por dia.
+            <div class="hero__content">
+              <p class="eyebrow" data-intro>Marketing + Automação</p>
+              <h1 class="hero__title">
+                <span class="hero__line" data-intro-line>Sua marca, exposta.</span>
+                <span class="hero__line hero__line--muted" data-intro-line>Seu negócio, no automático.</span>
+              </h1>
+              <p class="hero__lead" data-intro>
+                Unimos marketing estratégico e softwares de automação para empresas que querem ser vistas — e crescer
+                sem depender de esforço manual.
               </p>
-              <div class="hero__actions" data-hero-fade>
-                <a href="#cases" class="btn" data-magnetic>Ver projetos</a>
-                <a href="#contato" class="btn btn--ghost" data-magnetic>Iniciar projeto</a>
+              <div class="actions" data-intro>
+                <a href="#contato" class="pill">Iniciar projeto</a>
+                <a href="#cases" class="link">Ver cases</a>
               </div>
             </div>
-
-            <div class="hero__scroll" data-hero-fade>
-              <span>Role para explorar</span>
-              <span class="hero__scroll-line"></span>
+            <div class="stage" aria-hidden="true">
+              <svg class="stage__fallback"><use href="#ev-mark" /></svg>
             </div>
           </section>
 
-          <!-- 01 — MANIFESTO -->
+          <!-- DUAS FORÇAS (fixada; os traços do símbolo se separam) -->
+          <section class="forces" data-scene="forces" aria-label="Marketing e automação">
+            <div class="forces__titles">
+              <h2 class="headline forces__title forces__title--a">Duas forças.</h2>
+              <h2 class="headline forces__title forces__title--b" aria-hidden="true">Um só movimento.</h2>
+            </div>
+            <div class="forces__caption forces__caption--left">
+              <span class="dot dot--violet"></span>
+              <strong>Marketing</strong>
+              <span>Visibilidade que converte.</span>
+            </div>
+            <div class="forces__caption forces__caption--right">
+              <span class="dot dot--blue"></span>
+              <strong>Automação</strong>
+              <span>Sistemas que trabalham por você.</span>
+            </div>
+          </section>
+
+          <!-- MANIFESTO -->
           <section class="manifesto" id="sobre" data-scene="manifesto">
-            <div class="container manifesto__grid">
-              <p class="label">(01) Manifesto</p>
+            <div class="container container--narrow">
+              <p class="eyebrow">Sobre nós</p>
               <p class="manifesto__text" data-words>
                 Acreditamos que uma marca forte precisa ser vista — e que crescimento de verdade precisa ser
-                automatizado. Unimos criatividade, dados e tecnologia para expor o melhor do seu negócio e
-                transformar atenção em resultado.
+                automatizado. Unimos criatividade, dados e tecnologia para expor o melhor do seu negócio e transformar
+                atenção em resultado.
               </p>
             </div>
           </section>
 
-          <!-- 02 — MARKETING -->
-          <section class="services services--marketing" id="servicos" data-scene="marketing">
-            <div class="container services__grid services__grid--reverse">
-              <div class="services__head">
-                <p class="label">(02) Marketing</p>
-                <h2 class="title" data-lines>Visibilidade que converte.</h2>
-                <p class="services__intro" data-reveal>
-                  Estratégia, criação e mídia trabalhando juntas para colocar sua marca na frente das pessoas
-                  certas — e manter ela lá.
+          <!-- MARKETING -->
+          <section class="feature" id="marketing" data-scene="marketing">
+            <div class="container feature__grid">
+              <div class="feature__body">
+                <p class="eyebrow eyebrow--violet">Marketing</p>
+                <h2 class="headline" data-lines>Visibilidade<br />que converte.</h2>
+                <p class="intro" data-reveal>
+                  Estratégia, criação e mídia trabalhando juntas para colocar sua marca na frente das pessoas certas.
                 </p>
+                <ul class="list">
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+                      <path d="M19 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
+                    </svg>
+                    <p><strong>Branding e identidade visual.</strong> Posicionamento, naming, identidade e design system para marcas memoráveis.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 17l6-6 4 4 8-8" /><path d="M14 7h7v7" />
+                    </svg>
+                    <p><strong>Tráfego pago e performance.</strong> Campanhas em Meta, Google e TikTok guiadas por dados e testes contínuos.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="2" y="6" width="14" height="12" rx="2.5" /><path d="M16 10.5l6-3.5v10l-6-3.5" />
+                    </svg>
+                    <p><strong>Conteúdo e social media.</strong> Estratégia editorial, produção audiovisual e gestão de comunidade.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="2.5" y="4" width="19" height="16" rx="2.5" /><path d="M2.5 9h19" /><path d="M6 6.5h.01M8.5 6.5h.01" />
+                    </svg>
+                    <p><strong>Sites e landing pages.</strong> Experiências web rápidas, animadas e pensadas para conversão.</p>
+                  </li>
+                </ul>
               </div>
-              <ol class="services__list">
-                <li class="service" data-service>
-                  <span class="service__index">01</span>
-                  <div>
-                    <h3 class="service__title">Branding & Identidade Visual</h3>
-                    <p>Posicionamento, naming, identidade e design system para marcas que querem ser lembradas.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">02</span>
-                  <div>
-                    <h3 class="service__title">Tráfego Pago & Performance</h3>
-                    <p>Campanhas em Meta, Google e TikTok guiadas por dados, testes e otimização contínua.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">03</span>
-                  <div>
-                    <h3 class="service__title">Conteúdo & Social Media</h3>
-                    <p>Estratégia editorial, produção audiovisual e gestão de comunidade nas redes.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">04</span>
-                  <div>
-                    <h3 class="service__title">Sites & Landing Pages</h3>
-                    <p>Experiências web rápidas, animadas e pensadas do primeiro pixel à conversão.</p>
-                  </div>
-                </li>
-              </ol>
             </div>
           </section>
 
-          <!-- 03 — AUTOMAÇÃO -->
-          <section class="services services--automation" data-scene="automation">
-            <div class="container services__grid">
-              <div class="services__head">
-                <p class="label">(03) Automação</p>
-                <h2 class="title" data-lines>Sistemas que trabalham por você.</h2>
-                <p class="services__intro" data-reveal>
-                  Softwares e automações sob medida que eliminam tarefas repetitivas, conectam suas ferramentas
-                  e escalam a operação sem aumentar a equipe.
+          <!-- AUTOMAÇÃO -->
+          <section class="feature feature--reverse" id="automacao" data-scene="automation">
+            <div class="container feature__grid">
+              <div class="feature__body">
+                <p class="eyebrow eyebrow--blue">Automação</p>
+                <h2 class="headline" data-lines>Sistemas que<br />trabalham por você.</h2>
+                <p class="intro" data-reveal>
+                  Softwares sob medida que eliminam tarefas repetitivas, conectam suas ferramentas e escalam a operação.
                 </p>
+                <ul class="list">
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 5h16v10H10l-5 4v-4H4z" /><path d="M8.5 10h.01M12 10h.01M15.5 10h.01" />
+                    </svg>
+                    <p><strong>Chatbots e WhatsApp.</strong> Atendimento, qualificação e vendas automatizadas, 24 horas por dia.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 4h18l-7 8.5V18l-4 2v-7.5z" />
+                    </svg>
+                    <p><strong>CRM e funis automatizados.</strong> Réguas de nutrição, follow-up automático e distribuição de leads.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1" />
+                      <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
+                    </svg>
+                    <p><strong>Integrações e APIs.</strong> Seus sistemas conversando entre si, sem planilhas nem retrabalho.</p>
+                  </li>
+                  <li class="list__item" data-item>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 20v-7M10 20V5M15 20v-10M20 20v-4" />
+                    </svg>
+                    <p><strong>Dashboards e BI.</strong> Indicadores em tempo real para decisões rápidas e baseadas em dados.</p>
+                  </li>
+                </ul>
               </div>
-              <ol class="services__list">
-                <li class="service" data-service>
-                  <span class="service__index">01</span>
-                  <div>
-                    <h3 class="service__title">Chatbots & WhatsApp</h3>
-                    <p>Atendimento, qualificação e vendas automatizadas, 24/7, integradas ao seu funil.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">02</span>
-                  <div>
-                    <h3 class="service__title">CRM & Funis Automatizados</h3>
-                    <p>Implantação de CRM com réguas de nutrição, follow-up automático e distribuição de leads.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">03</span>
-                  <div>
-                    <h3 class="service__title">Integrações & APIs</h3>
-                    <p>Conectamos seus sistemas para eliminar planilhas, retrabalho e processos manuais.</p>
-                  </div>
-                </li>
-                <li class="service" data-service>
-                  <span class="service__index">04</span>
-                  <div>
-                    <h3 class="service__title">Dashboards & BI</h3>
-                    <p>Indicadores em tempo real para decisões rápidas e baseadas em dados.</p>
-                  </div>
-                </li>
-              </ol>
             </div>
           </section>
 
-          <!-- Faixa animada (velocidade reage ao scroll) -->
-          <div class="marquee" aria-hidden="true">
-            <div class="marquee__row" data-marquee="1">
-              <div class="marquee__track">
-                <span>Branding</span><i>✦</i><span>Performance</span><i>✦</i><span>Social Media</span><i>✦</i>
-                <span>Web</span><i>✦</i><span>Chatbots</span><i>✦</i><span>CRM</span><i>✦</i>
-                <span>Integrações</span><i>✦</i><span>BI</span><i>✦</i>
-              </div>
-            </div>
-            <div class="marquee__row marquee__row--outline" data-marquee="-1">
-              <div class="marquee__track">
-                <span>Estratégia</span><i>✦</i><span>Criatividade</span><i>✦</i><span>Dados</span><i>✦</i>
-                <span>Tecnologia</span><i>✦</i><span>Resultado</span><i>✦</i><span>Escala</span><i>✦</i>
-              </div>
-            </div>
-          </div>
-
-          <!-- 04 — PROCESSO (scroll horizontal fixado) -->
+          <!-- PROCESSO (scroll horizontal fixado) -->
           <section class="process" id="processo" data-scene="process">
-            <div class="process__head container">
-              <p class="label">(04) Processo</p>
-              <h2 class="title" data-lines>Do diagnóstico à escala.</h2>
+            <div class="container process__head">
+              <p class="eyebrow">Processo</p>
+              <h2 class="headline" data-lines>Do diagnóstico à escala.</h2>
             </div>
-            <div class="process__viewport">
-              <div class="process__track">
-                <article class="step">
-                  <span class="step__index">01</span>
-                  <h3 class="step__title">Diagnóstico</h3>
+            <div class="process__track">
+              <article class="card">
+                <span class="card__index">01</span>
+                <div>
+                  <h3 class="card__title">Diagnóstico</h3>
                   <p>Imersão no seu negócio, público e concorrência. Mapeamos gargalos e oportunidades reais.</p>
-                </article>
-                <article class="step">
-                  <span class="step__index">02</span>
-                  <h3 class="step__title">Estratégia</h3>
-                  <p>Plano de marca, mídia e automação com metas claras, prazos e indicadores mensuráveis.</p>
-                </article>
-                <article class="step">
-                  <span class="step__index">03</span>
-                  <h3 class="step__title">Execução</h3>
-                  <p>Criação, desenvolvimento e implantação em sprints ágeis, com entregas visíveis toda semana.</p>
-                </article>
-                <article class="step">
-                  <span class="step__index">04</span>
-                  <h3 class="step__title">Escala</h3>
+                </div>
+              </article>
+              <article class="card">
+                <span class="card__index">02</span>
+                <div>
+                  <h3 class="card__title">Estratégia</h3>
+                  <p>Plano de marca, mídia e automação com metas claras e indicadores mensuráveis.</p>
+                </div>
+              </article>
+              <article class="card">
+                <span class="card__index">03</span>
+                <div>
+                  <h3 class="card__title">Execução</h3>
+                  <p>Criação, desenvolvimento e implantação em sprints, com entregas visíveis toda semana.</p>
+                </div>
+              </article>
+              <article class="card">
+                <span class="card__index">04</span>
+                <div>
+                  <h3 class="card__title">Escala</h3>
                   <p>Monitoramos, otimizamos e automatizamos para crescer sem inflar custos e equipe.</p>
-                </article>
-              </div>
+                </div>
+              </article>
             </div>
-            <div class="process__progress container" aria-hidden="true">
-              <span class="process__progress-bar"></span>
-            </div>
+            <div class="dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
           </section>
 
-          <!-- 05 — CASES
-               EXEMPLOS: substitua títulos, textos, métricas e capas pelos cases reais da Exposed Visualls. -->
+          <!-- CASES (EXEMPLOS: substitua pelos cases reais) -->
           <section class="work" id="cases" data-scene="work">
             <div class="container">
-              <div class="work__head">
-                <p class="label">(05) Projetos selecionados</p>
-                <h2 class="title" data-lines>Cases</h2>
+              <div class="section-head">
+                <p class="eyebrow">Cases</p>
+                <h2 class="headline" data-lines>Resultados que<br />se expõem sozinhos.</h2>
               </div>
 
-              <div class="work__grid">
-                <a href="#contato" class="case" data-case data-cursor="Ver case">
-                  <div class="case__media">
-                    <div class="case__img case__img--1" data-parallax><span>EV</span></div>
+              <div class="bento">
+                <a href="#contato" class="tile tile--wide tile--brand" data-tile>
+                  <div class="tile__text">
+                    <p class="tile__tag">Branding · Campanha</p>
+                    <h3 class="tile__title">Rebranding e lançamento</h3>
+                    <p class="tile__sub">Varejo de moda · <span class="grad">+180% de alcance</span></p>
                   </div>
-                  <div class="case__meta">
-                    <span class="tag">Branding</span><span class="tag">Campanha</span>
-                    <span class="case__metric">+180% alcance</span>
+                  <div class="visual visual--brand" aria-hidden="true">
+                    <svg class="visual__mark" viewBox="0 0 63 120"><use href="#ev-mark" /></svg>
                   </div>
-                  <h3 class="case__title">Rebranding & lançamento — Varejo de moda</h3>
                 </a>
 
-                <a href="#contato" class="case case--offset" data-case data-cursor="Ver case">
-                  <div class="case__media">
-                    <div class="case__img case__img--2" data-parallax><span>⌘</span></div>
+                <a href="#contato" class="tile" data-tile>
+                  <div class="tile__text">
+                    <p class="tile__tag">Chatbot · CRM</p>
+                    <h3 class="tile__title">Funil no WhatsApp</h3>
+                    <p class="tile__sub">Educação · <span class="grad">−60% no tempo de resposta</span></p>
                   </div>
-                  <div class="case__meta">
-                    <span class="tag">Chatbot</span><span class="tag">CRM</span>
-                    <span class="case__metric">−60% tempo de resposta</span>
+                  <div class="visual visual--chat" aria-hidden="true">
+                    <span class="bubble bubble--in">Olá! Quero saber sobre o curso.</span>
+                    <span class="bubble bubble--out">Claro! Qual é o seu objetivo?</span>
+                    <span class="bubble bubble--in">Mudar de carreira em 2026.</span>
+                    <span class="bubble bubble--out">Perfeito. Separei 3 opções para você ✦</span>
                   </div>
-                  <h3 class="case__title">Funil automatizado no WhatsApp — Educação</h3>
                 </a>
 
-                <a href="#contato" class="case" data-case data-cursor="Ver case">
-                  <div class="case__media">
-                    <div class="case__img case__img--3" data-parallax><span>↗</span></div>
+                <a href="#contato" class="tile" data-tile>
+                  <div class="tile__text">
+                    <p class="tile__tag">Tráfego pago · Criativos</p>
+                    <h3 class="tile__title">Performance para e&#8209;commerce</h3>
+                    <p class="tile__sub">E-commerce · <span class="grad">4,2× ROAS</span></p>
                   </div>
-                  <div class="case__meta">
-                    <span class="tag">Tráfego pago</span><span class="tag">Criativos</span>
-                    <span class="case__metric">4,2× ROAS</span>
+                  <div class="visual visual--chart" aria-hidden="true">
+                    <svg viewBox="0 0 300 140" preserveAspectRatio="none">
+                      <path class="chart__area" d="M0 128 L40 118 L80 122 L120 96 L160 100 L200 64 L240 52 L300 14 L300 140 L0 140 Z" />
+                      <path class="chart__line" d="M0 128 L40 118 L80 122 L120 96 L160 100 L200 64 L240 52 L300 14" />
+                    </svg>
                   </div>
-                  <h3 class="case__title">Performance para e-commerce</h3>
                 </a>
 
-                <a href="#contato" class="case case--offset" data-case data-cursor="Ver case">
-                  <div class="case__media">
-                    <div class="case__img case__img--4" data-parallax><span>◎</span></div>
+                <a href="#contato" class="tile tile--wide" data-tile>
+                  <div class="tile__text">
+                    <p class="tile__tag">Integrações · BI</p>
+                    <h3 class="tile__title">Dashboard de operações</h3>
+                    <p class="tile__sub">Logística · <span class="grad">12 h/semana economizadas</span></p>
                   </div>
-                  <div class="case__meta">
-                    <span class="tag">Integrações</span><span class="tag">BI</span>
-                    <span class="case__metric">12 h/semana economizadas</span>
+                  <div class="visual visual--bars" aria-hidden="true">
+                    <span style="--h: 38%"></span><span style="--h: 54%"></span><span style="--h: 46%"></span>
+                    <span style="--h: 68%"></span><span style="--h: 60%"></span><span style="--h: 82%"></span>
+                    <span style="--h: 74%"></span><span style="--h: 92%"></span>
                   </div>
-                  <h3 class="case__title">Dashboard de operações — Logística</h3>
                 </a>
               </div>
             </div>
           </section>
 
-          <!-- 06 — NÚMEROS (EXEMPLOS: substitua pelos números reais) -->
+          <!-- NÚMEROS (EXEMPLOS: substitua pelos números reais) -->
           <section class="stats" data-scene="stats">
             <div class="container stats__grid">
-              <div class="stat">
-                <span class="stat__value">+<span data-count="120">120</span></span>
+              <div class="stat" data-stat>
+                <span class="stat__value grad">+<span data-count="120">120</span></span>
                 <span class="stat__label">projetos entregues</span>
               </div>
-              <div class="stat">
-                <span class="stat__value"><span data-count="98">98</span>%</span>
+              <div class="stat" data-stat>
+                <span class="stat__value grad"><span data-count="98">98</span>%</span>
                 <span class="stat__label">de clientes satisfeitos</span>
               </div>
-              <div class="stat">
-                <span class="stat__value">+<span data-count="40">40</span></span>
+              <div class="stat" data-stat>
+                <span class="stat__value grad">+<span data-count="40">40</span></span>
                 <span class="stat__label">automações em operação</span>
               </div>
-              <div class="stat">
-                <span class="stat__value">24/7</span>
+              <div class="stat" data-stat>
+                <span class="stat__value grad">24/7</span>
                 <span class="stat__label">sistemas trabalhando por você</span>
               </div>
             </div>
           </section>
 
-          <!-- 07 — CONTATO
-               Atualize o e-mail, o número de WhatsApp e as redes sociais. -->
+          <!-- CONTATO (atualize e-mail, WhatsApp e redes sociais) -->
           <section class="contact" id="contato" data-scene="contact">
-            <div class="container contact__inner">
-              <p class="label">(06) Contato</p>
-              <h2 class="contact__title" data-lines>Vamos expor<br />sua marca?</h2>
-              <p class="contact__lead" data-reveal>
-                Conte sobre o seu projeto. Respondemos em até 24 horas úteis.
-              </p>
-              <a href="mailto:contato@exposedvisualls.com" class="contact__cta" data-magnetic data-cursor="Vamos!">
-                <span>Iniciar<br />projeto</span>
-              </a>
+            <div class="contact__content">
+              <p class="eyebrow">Contato</p>
+              <h2 class="headline headline--xl" data-lines>Vamos expor<br />sua marca?</h2>
+              <p class="intro" data-reveal>Conte sobre o seu projeto. Respondemos em até 24 horas úteis.</p>
+            </div>
+            <div class="stage stage--small" aria-hidden="true">
+              <svg class="stage__fallback"><use href="#ev-mark" /></svg>
+            </div>
+            <div class="contact__actions" data-reveal>
+              <div class="actions">
+                <a href="mailto:contato@exposedvisualls.com" class="pill pill--light">Iniciar projeto</a>
+                <a href="https://wa.me/5500000000000" class="link link--light" target="_blank" rel="noopener">Falar no WhatsApp</a>
+              </div>
               <ul class="contact__links">
                 <li><a href="mailto:contato@exposedvisualls.com">contato@exposedvisualls.com</a></li>
-                <li><a href="https://wa.me/5500000000000" target="_blank" rel="noopener">WhatsApp</a></li>
                 <li><a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a></li>
                 <li><a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></li>
               </ul>
@@ -349,10 +367,42 @@
         </main>
 
         <footer class="footer">
-          <div class="container footer__inner">
-            <span class="footer__brand"><span class="logo-mark" aria-hidden="true"></span>Exposed Visualls</span>
-            <span>© <span data-year>2026</span> Exposed Visualls. Todos os direitos reservados.</span>
-            <a href="#inicio" class="footer__top">Voltar ao topo ↑</a>
+          <div class="container">
+            <div class="footer__top">
+              <a href="#inicio" class="lockup lockup--footer" aria-label="Exposed Visualls — voltar ao topo">
+                <svg class="mark" aria-hidden="true"><use href="#ev-mark" /></svg>
+                <span class="lockup__type" aria-hidden="true">
+                  <span>EX</span><span>POSED</span><span class="lockup__sub">VISUALLS</span>
+                </span>
+              </a>
+              <div class="footer__cols">
+                <div>
+                  <h4>Marketing</h4>
+                  <a href="#marketing">Branding</a>
+                  <a href="#marketing">Tráfego pago</a>
+                  <a href="#marketing">Social media</a>
+                  <a href="#marketing">Sites</a>
+                </div>
+                <div>
+                  <h4>Automação</h4>
+                  <a href="#automacao">Chatbots</a>
+                  <a href="#automacao">CRM</a>
+                  <a href="#automacao">Integrações</a>
+                  <a href="#automacao">Dashboards</a>
+                </div>
+                <div>
+                  <h4>Empresa</h4>
+                  <a href="#sobre">Sobre</a>
+                  <a href="#processo">Processo</a>
+                  <a href="#cases">Cases</a>
+                  <a href="#contato">Contato</a>
+                </div>
+              </div>
+            </div>
+            <div class="footer__legal">
+              <span>© <span data-year>2026</span> Exposed Visualls. Todos os direitos reservados.</span>
+              <span>Feito no Brasil.</span>
+            </div>
           </div>
         </footer>
       </div>

@@ -1,223 +1,169 @@
 import * as THREE from 'three'
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import Core from './Core.js'
-import Rings from './Rings.js'
-import Particles from './Particles.js'
-import { KEYFRAMES, PALETTES } from './keyframes.js'
+import LogoMark from './LogoMark.js'
+import Glow from './Glow.js'
+import { KEYFRAMES } from './keyframes.js'
 
-// Preto puro: é o único tom que sai idêntico com e sem pós-processamento (o tone mapping esmaga tons escuros)
-const BACKGROUND = '#000000'
-const OBJECT_SIZE = 5.4 // diâmetro aproximado do objeto (anéis incluídos) em unidades de cena
+const OBJECT_WIDTH = 2.6 // largura útil (com os traços separados) em unidades de cena
 
-const { damp, clamp } = THREE.MathUtils
+const { damp, clamp, lerp } = THREE.MathUtils
 
 /**
- * Experiência three.js: renderer, câmera, cena e loop.
- * O estado (`this.state`) é animado de fora pelo GSAP (SceneDirector)
+ * Experiência three.js: renderer transparente sobre o fundo da página,
+ * o símbolo 3D, o halo e o loop. O estado (`this.state`) é animado pelo GSAP
  * e lido aqui a cada frame.
  */
 export default class Experience {
-  constructor({ canvas, quality = 'high' }) {
+  constructor({ canvas, state, anchors = {} }) {
     this.canvas = canvas
-    this.quality = quality
-    this.useBloom = quality === 'high'
-
-    this.state = { ...KEYFRAMES.hero, orbit: 0, intro: 0 }
+    this.anchors = anchors
+    this.state = state ?? { ...KEYFRAMES.hero, split: 0, orbit: 0, reveal: 1 }
     this.pointer = { x: 0, y: 0, targetX: 0, targetY: 0 }
-    this.scroll = { offset: 0, velocity: 0 }
     this.viewport = { width: 1, height: 1, fit: 1, portrait: false }
-    this.palette = PALETTES.map((p) => ({
-      a: new THREE.Color(p.a),
-      b: new THREE.Color(p.b),
-      rim: new THREE.Color(p.rim),
-    }))
-    this.colors = { a: new THREE.Color(), b: new THREE.Color(), rim: new THREE.Color(), particles: new THREE.Color() }
-    this.lastDim = -1
-    this.performance = { frames: 0, time: 0, checked: false }
+    this.lastOpacity = -1
 
     this.setRenderer()
     this.setScene()
-    this.setPostProcessing()
     this.resize()
 
-    this.onResize = this.resize.bind(this)
-    this.onPointerMove = this.handlePointer.bind(this)
-    window.addEventListener('resize', this.onResize)
-    window.addEventListener('pointermove', this.onPointerMove, { passive: true })
+    window.addEventListener('resize', () => this.resize())
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        this.pointer.targetX = (event.clientX / window.innerWidth) * 2 - 1
+        this.pointer.targetY = (event.clientY / window.innerHeight) * 2 - 1
+      },
+      { passive: true },
+    )
   }
 
   setRenderer() {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: !this.useBloom,
+      alpha: true,
+      antialias: true,
       powerPreference: 'high-performance',
     })
-    this.renderer.setClearColor(BACKGROUND, 1)
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-    this.renderer.toneMappingExposure = 1.05
+    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.toneMapping = THREE.NeutralToneMapping
+    this.renderer.localClippingEnabled = true
   }
 
   setScene() {
     this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100)
-    this.camera.position.set(0, 0, 9)
+    this.camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50)
+    this.camera.position.set(0, 0, 8)
 
     const pmrem = new THREE.PMREMGenerator(this.renderer)
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.03).texture
     pmrem.dispose()
 
+    this.light = new THREE.DirectionalLight(0xffffff, 1.4)
+    this.light.position.set(3, 3, 5)
+    this.scene.add(this.light)
+
+    // Plano de corte que "revela" o símbolo de baixo para cima na entrada
+    this.clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)
+
     this.object = new THREE.Group()
-    this.core = new Core({ detail: this.quality === 'high' ? 64 : 28 })
-    this.rings = new Rings()
-    this.object.add(this.core.group, this.rings.group)
+    this.logo = new LogoMark({ clippingPlanes: [this.clip] })
+    this.object.add(this.logo.group)
     this.scene.add(this.object)
 
-    this.particles = new Particles({ count: this.quality === 'high' ? 1600 : 700 })
-    this.scene.add(this.particles.points)
-  }
-
-  setPostProcessing() {
-    if (!this.useBloom) return
-
-    const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 })
-    this.composer = new EffectComposer(this.renderer, target)
-    this.composer.addPass(new RenderPass(this.scene, this.camera))
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.5, 0.35, 0.72)
-    this.composer.addPass(this.bloom)
-    this.composer.addPass(new OutputPass())
+    this.glow = new Glow()
+    this.scene.add(this.glow.mesh)
   }
 
   resize() {
     const width = window.innerWidth
     const height = window.innerHeight
-    const pixelRatio = Math.min(window.devicePixelRatio, this.quality === 'high' ? 2 : 1.5)
 
-    this.renderer.setPixelRatio(pixelRatio)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.renderer.setSize(width, height, false)
-    this.particles.setPixelRatio(pixelRatio)
-
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
 
-    if (this.composer) {
-      this.composer.setPixelRatio(Math.min(pixelRatio, 1.5))
-      this.composer.setSize(width, height)
-    }
-
     const visibleHeight = 2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)) * this.camera.position.z
-    const visibleWidth = visibleHeight * this.camera.aspect
-    this.viewport.width = visibleWidth
+    this.viewport.width = visibleHeight * this.camera.aspect
     this.viewport.height = visibleHeight
-    this.viewport.fit = Math.min(1, visibleWidth / OBJECT_SIZE)
+    this.viewport.fit = Math.min(1, this.viewport.width / OBJECT_WIDTH)
     this.viewport.portrait = width / height < 0.9
   }
 
-  /** Se o aparelho não sustentar ~35 fps, desliga o bloom e reduz a resolução. */
-  monitorPerformance(delta) {
-    const perf = this.performance
-    if (perf.checked || this.state.intro < 0.6) return
-
-    perf.frames++
-    perf.time += delta
-    if (perf.frames < 90) return
-
-    perf.checked = true
-    if (perf.frames / perf.time >= 35 || this.quality === 'low') return
-
-    this.composer?.dispose()
-    this.composer = null
-    this.quality = 'low'
-    this.resize()
+  /** Posição e escala (em unidades de cena) que encaixam o símbolo num elemento da página. */
+  measureAnchor(element, fill = 0.9) {
+    const rect = element.getBoundingClientRect()
+    const { width, height } = this.viewport
+    return {
+      x: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * width,
+      y: (0.5 - (rect.top + rect.height / 2) / window.innerHeight) * height,
+      scale: Math.min(((rect.height / window.innerHeight) * height * fill) / 2, width * 0.42),
+    }
   }
 
-  handlePointer(event) {
-    this.pointer.targetX = (event.clientX / window.innerWidth) * 2 - 1
-    this.pointer.targetY = (event.clientY / window.innerHeight) * 2 - 1
-  }
+  /** Mistura a posição do keyframe com a dos elementos-âncora, conforme os pesos do estado. */
+  resolvePlacement() {
+    const s = this.state
+    const { width, height, fit, portrait } = this.viewport
+    const placement = { x: s.x * width * (portrait ? 0 : 1), y: s.y * height, scale: s.scale * fit }
+    const weights = { hero: s.anchorHero, contact: s.anchorContact }
+    const total = Math.min(1, weights.hero + weights.contact)
+    if (total < 0.001) return placement
 
-  setScroll(offset, velocity) {
-    this.scroll.offset = offset
-    this.scroll.velocity = velocity
-  }
-
-  updateColors(palette) {
-    const t = clamp(palette, 0, 1) * (this.palette.length - 1)
-    const i = Math.min(Math.floor(t), this.palette.length - 2)
-    const f = t - i
-    const from = this.palette[i]
-    const to = this.palette[i + 1]
-
-    this.colors.a.lerpColors(from.a, to.a, f)
-    this.colors.b.lerpColors(from.b, to.b, f)
-    this.colors.rim.lerpColors(from.rim, to.rim, f)
-    this.colors.particles.copy(this.colors.rim).lerp(this.colors.b, 0.35)
+    placement.x *= 1 - total
+    placement.y *= 1 - total
+    placement.scale *= 1 - total
+    Object.entries(weights).forEach(([name, weight]) => {
+      const element = this.anchors[name]
+      if (weight < 0.001 || !element) return
+      const anchor = this.measureAnchor(element)
+      placement.x += anchor.x * weight
+      placement.y += anchor.y * weight
+      placement.scale += anchor.scale * weight
+    })
+    return placement
   }
 
   update(time, delta) {
     const s = this.state
-    const { width, height, fit, portrait } = this.viewport
     const p = this.pointer
+    const { width, portrait } = this.viewport
     const dt = Math.min(delta, 0.1)
 
-    p.x = damp(p.x, p.targetX, 3, dt)
-    p.y = damp(p.y, p.targetY, 3, dt)
+    p.x = damp(p.x, p.targetX, 2.5, dt)
+    p.y = damp(p.y, p.targetY, 2.5, dt)
 
-    // A velocidade do scroll deixa a cena mais "nervosa" por alguns instantes
-    this.scroll.velocity = damp(this.scroll.velocity, 0, 2.5, dt)
-    const energy = clamp(Math.abs(this.scroll.velocity) / 2500, 0, 1)
+    const reveal = clamp(s.reveal, 0, 1)
+    const revealEase = 1 - Math.pow(1 - reveal, 3)
+    const placement = this.resolvePlacement()
+    const scale = Math.max(0.0001, placement.scale)
 
-    const intro = s.intro
-    const introEase = 1 - Math.pow(1 - intro, 3)
-
-    this.object.position.x = s.x * width * (portrait ? 0.12 : 1) + p.x * 0.12
-    this.object.position.y = s.y * height + Math.sin(time * 0.8) * 0.06 - p.y * 0.08
-    this.object.scale.setScalar(Math.max(0.0001, s.scale * fit * (0.4 + 0.6 * introEase)))
-
+    this.object.position.set(placement.x + p.x * 0.05, placement.y + Math.sin(time * 0.8) * 0.025, 0)
+    this.object.scale.setScalar(scale * (0.92 + 0.08 * revealEase))
     this.object.rotation.set(
-      s.rotX + p.y * 0.25,
-      s.rotY + s.orbit + time * 0.08 + p.x * 0.35 + (1 - introEase) * -2.5,
+      s.rotX - p.y * 0.12 + Math.sin(time * 0.6) * 0.025,
+      s.rotY + s.orbit + p.x * 0.2 + Math.sin(time * 0.45) * 0.07 - (1 - revealEase) * 0.6,
       s.rotZ,
     )
 
-    this.updateColors(s.palette)
+    // Afastamento dos traços limitado pela largura da tela
+    const distance = Math.min(0.95, (width * 0.3) / scale)
+    this.logo.update({ split: s.split, distance, focus: s.focus, lift: lerp(0.32, 0.18, s.dark) })
 
-    this.core.update(time, {
-      distort: s.distort + energy * 0.22 + (1 - introEase) * 0.6,
-      frequency: s.frequency,
-      wire: s.wire * 0.55,
-      colors: this.colors,
-    })
+    this.clip.constant = reveal >= 1 ? 1e4 : this.object.position.y + (reveal * 2 - 1) * scale * 1.45
 
-    this.rings.update(time, dt, {
-      align: s.align,
-      spread: s.spread * (0.6 + 0.4 * introEase),
-      speed: 1 + energy * 6,
-      parentQuaternion: this.object.quaternion,
-      satelliteColor: this.colors.rim,
-    })
+    this.glow.mesh.position.set(this.object.position.x, this.object.position.y, -0.9)
+    this.glow.mesh.scale.setScalar(scale * (1 + s.split * 0.6))
+    this.glow.update({ intensity: s.glow * revealEase, dark: s.dark })
 
-    this.particles.update(time, {
-      scroll: this.scroll.offset * 0.0035,
-      color: this.colors.particles,
-    })
+    this.light.position.set(3 + p.x * 3, 3 - p.y * 3, 5)
 
-    this.camera.position.x = damp(this.camera.position.x, p.x * 0.3, 2, dt)
-    this.camera.position.y = damp(this.camera.position.y, -p.y * 0.2, 2, dt)
-    this.camera.lookAt(0, 0, 0)
-
-    const dim = s.dim * (portrait ? 0.75 : 1) * introEase
-    if (Math.abs(dim - this.lastDim) > 0.002) {
-      this.canvas.style.opacity = dim.toFixed(3)
-      this.lastDim = dim
+    const opacity = s.opacity * (portrait ? lerp(0.22, 1, s.fg) : 1)
+    if (Math.abs(opacity - this.lastOpacity) > 0.002) {
+      this.canvas.style.opacity = opacity.toFixed(3)
+      this.lastOpacity = opacity
     }
 
-    if (this.composer) this.composer.render(dt)
-    else this.renderer.render(this.scene, this.camera)
-
-    this.monitorPerformance(delta)
+    this.renderer.render(this.scene, this.camera)
   }
 }
