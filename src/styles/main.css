@@ -554,21 +554,27 @@ button {
   margin: 1vh 0 5vh;
 }
 
-/* Sem WebGL, o símbolo aparece em SVG no lugar da cena 3D */
+/* Sem WebGL, o logo aparece em HTML/SVG no lugar da cena 3D */
 .stage__fallback {
   display: none;
   position: absolute;
   inset: 0;
   margin: auto;
-  height: 80%;
-  aspect-ratio: 63 / 120;
-  fill: none;
-  stroke-width: 4px;
-  overflow: visible;
+  width: max-content;
+  height: max-content;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+}
+
+.stage__fallback .mark {
+  stroke-width: 3px;
+}
+
+.contact .stage__fallback {
+  color: #fff;
 }
 
 .no-webgl .stage__fallback {
-  display: block;
+  display: inline-flex;
 }
 
 .stage--small {

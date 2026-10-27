@@ -22,8 +22,8 @@ export default class SectionAnimations {
   }
 
   /**
-   * "Duas forças": a seção fica fixada enquanto as duas metades da ampulheta se
-   * separam (marketing × automação) e depois se reencontram com um quarto de volta.
+   * "Duas forças": a seção fica fixada enquanto o logo gira e se abre em camadas
+   * (os dois traços se afastam: marketing × automação) e depois se remonta.
    */
   setForces() {
     const section = document.querySelector('.forces')
@@ -47,13 +47,12 @@ export default class SectionAnimations {
         },
       })
       .fromTo(titleA, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0)
-      .fromTo(this.state, { split: 0 }, { split: 1, duration: 1.2, immediateRender: false }, 0.2)
+      .fromTo(this.state, { split: 0, orbit: 0 }, { split: 1, orbit: -0.45, duration: 1.2, immediateRender: false }, 0.2)
       .fromTo(left, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6 }, 0.7)
       .fromTo(right, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.6 }, 0.8)
       .to([left, right], { opacity: 0, duration: 0.5 }, 1.9)
       .to(titleA, { opacity: 0, y: -20, duration: 0.5 }, 1.9)
-      .to(this.state, { split: 0, duration: 1.2 }, 2)
-      .fromTo(this.state, { orbit: 0 }, { orbit: Math.PI / 2, duration: 1.2, immediateRender: false }, 2)
+      .to(this.state, { split: 0, orbit: 0, duration: 1.2 }, 2)
       .fromTo(titleB, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 2.5)
       .to({}, { duration: 0.3 })
   }
@@ -87,16 +86,14 @@ export default class SectionAnimations {
       },
     })
 
-    gsap.fromTo(
-      this.state,
-      { orbit: Math.PI / 2 },
-      {
-        orbit: Math.PI,
-        ease: 'none',
-        immediateRender: false,
+    // O logo acompanha os cards com um balanço suave e volta de frente no fim
+    gsap
+      .timeline({
+        defaults: { ease: 'sine.inOut' },
         scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: 1.2 },
-      },
-    )
+      })
+      .fromTo(this.state, { orbit: 0 }, { orbit: 0.4, immediateRender: false })
+      .to(this.state, { orbit: 0 })
 
     gsap.from(section.querySelectorAll('.card'), {
       y: 80,
@@ -202,7 +199,7 @@ export default class SectionAnimations {
 
   /**
    * Contato: um fundo preto fixo (atrás do canvas) acompanha a seção, então o
-   * a ampulheta 3D aparece sobre o preto. A navegação fica escura por cima dela.
+   * o logo 3D aparece sobre o preto. A navegação fica escura por cima dela.
    */
   setContact() {
     const contact = document.querySelector('.contact')

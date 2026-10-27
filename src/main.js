@@ -20,7 +20,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 class App {
   constructor() {
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    // Estado compartilhado da ampulheta 3D: animado pelo GSAP, lido pelo three.js
+    // Estado compartilhado do logo 3D: animado pelo GSAP, lido pelo three.js
     this.state = { ...KEYFRAMES.hero, split: 0, orbit: 0, reveal: this.reducedMotion ? 1 : 0 }
 
     document.documentElement.classList.toggle('reduced-motion', this.reducedMotion)
