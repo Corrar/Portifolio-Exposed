@@ -7,13 +7,13 @@ import { KEYFRAMES } from '../webgl/keyframes.js'
  *
  * Monta uma timeline GSAP pausada com uma transição (duração 1) entre cada par
  * de seções [data-scene]. A soma do progresso dos ScrollTriggers de entrada
- * de cada seção vira o "tempo" da timeline, que é perseguido com inércia —
- * por isso o objeto continua deslizando suavemente depois que o scroll para.
+ * de cada seção vira o "tempo" da timeline. A inércia fica num lugar só: a mola
+ * do Experience, que segue esse estado sem trancos (nada de recriar tweens a
+ * cada evento de scroll).
  */
 export default class SceneDirector {
-  constructor({ state, sections, reducedMotion = false }) {
+  constructor({ state, sections }) {
     this.state = state
-    this.reducedMotion = reducedMotion
 
     const frames = sections.map((section) => KEYFRAMES[section.dataset.scene] ?? KEYFRAMES.hero)
     Object.assign(state, frames[0])
@@ -34,23 +34,17 @@ export default class SceneDirector {
         start: 'top bottom',
         end: 'top top',
         onUpdate: () => this.sync(),
-        onRefresh: () => this.sync(true),
+        onRefresh: () => this.sync(),
       }),
     )
-    this.sync(true)
+    this.sync()
   }
 
-  sync(immediate = false) {
+  sync() {
     if (!this.triggers) return
 
-    const time = this.triggers.reduce((sum, trigger) => sum + trigger.progress, 0)
-
-    if (immediate || this.reducedMotion) {
-      gsap.killTweensOf(this.timeline)
-      this.timeline.time(time)
-      return
-    }
-
-    gsap.to(this.timeline, { time, duration: 1.8, ease: 'power2.out', overwrite: true })
+    let time = 0
+    for (let i = 0; i < this.triggers.length; i++) time += this.triggers[i].progress
+    this.timeline.time(time)
   }
 }

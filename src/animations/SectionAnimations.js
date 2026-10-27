@@ -42,7 +42,7 @@ export default class SectionAnimations {
           start: 'top top',
           end: '+=240%',
           pin: true,
-          scrub: 1.5,
+          scrub: 0.8,
           refreshPriority: 2,
         },
       })
@@ -90,7 +90,7 @@ export default class SectionAnimations {
     gsap
       .timeline({
         defaults: { ease: 'sine.inOut' },
-        scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: 1.2 },
+        scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: true },
       })
       .fromTo(this.state, { orbit: 0 }, { orbit: 0.4, immediateRender: false })
       .to(this.state, { orbit: 0 })
@@ -199,7 +199,9 @@ export default class SectionAnimations {
 
   /**
    * Contato: um fundo preto fixo (atrás do canvas) acompanha a seção, então o
-   * o logo 3D aparece sobre o preto. A navegação fica escura por cima dela.
+   * logo 3D aparece sobre o preto. Ele é movido só com transform (sem repintar a
+   * tela a cada frame); abaixo do contato, o rodapé opaco cobre o resto.
+   * A navegação fica escura por cima dele.
    */
   setContact() {
     const contact = document.querySelector('.contact')
@@ -207,16 +209,13 @@ export default class SectionAnimations {
     const nav = document.querySelector('.nav')
     if (!contact || !backdrop) return
 
-    let last = ''
+    let last = -1
     gsap.ticker.add(() => {
-      const rect = contact.getBoundingClientRect()
       const height = window.innerHeight
-      const top = Math.min(Math.max(rect.top, 0), height)
-      const bottom = Math.min(Math.max(height - rect.bottom, 0), height)
-      const clip = `inset(${top.toFixed(1)}px 0 ${bottom.toFixed(1)}px 0)`
-      if (clip !== last) {
-        backdrop.style.clipPath = clip
-        last = clip
+      const top = Math.round(Math.min(Math.max(contact.getBoundingClientRect().top, 0), height))
+      if (top !== last) {
+        backdrop.style.transform = `translate3d(0, ${top}px, 0)`
+        last = top
       }
     })
 

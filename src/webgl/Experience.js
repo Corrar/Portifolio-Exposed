@@ -4,15 +4,32 @@ import Logo3D from './Logo3D.js'
 import Glow from './Glow.js'
 import { KEYFRAMES } from './keyframes.js'
 
-const SMOOTHING = 3.2 // quanto maior, mais rápido o logo alcança o estado animado pelo GSAP
+const SMOOTH_TIME = 0.5 // segundos que o logo leva, aproximadamente, para alcançar o estado do scroll
+const POINTER_SMOOTH_TIME = 0.6
 const MAX_WIDTH = 0.8 // fração máxima da largura disponível que o logo pode ocupar (sobra margem para a perspectiva)
 
-const { damp, clamp, lerp } = THREE.MathUtils
+const { clamp, lerp } = THREE.MathUtils
+
+/**
+ * Mola criticamente amortecida (como o SmoothDamp da Unity): acelera e desacelera sem
+ * saltos de velocidade, o que deixa o movimento fluido mesmo quando o alvo muda a cada frame.
+ * A velocidade fica guardada em `velocities[key]`.
+ */
+function smoothDamp(current, target, velocities, key, smoothTime, dt) {
+  const omega = 2 / smoothTime
+  const x = omega * dt
+  const decay = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x)
+  const change = current - target
+  const velocity = velocities[key] ?? 0
+  const temp = (velocity + omega * change) * dt
+  velocities[key] = (velocity - omega * temp) * decay
+  return target + (change + temp) * decay
+}
 
 /**
  * Experiência three.js: renderer transparente sobre o fundo da página,
  * o logo 3D, o halo e o loop. O estado (`this.state`) é animado pelo GSAP;
- * aqui ele é suavizado mais uma vez (`this.smooth`) e aplicado a cada frame.
+ * aqui ele segue esse estado com uma mola (`this.smooth`) e é aplicado a cada frame.
  */
 export default class Experience {
   constructor({ canvas, state, anchors = {} }) {
@@ -20,8 +37,13 @@ export default class Experience {
     this.anchors = anchors
     this.state = state ?? { ...KEYFRAMES.hero, split: 0, orbit: 0, reveal: 1 }
     this.smooth = { ...this.state }
+    this.smoothKeys = Object.keys(this.state).filter((key) => key !== 'reveal')
+    this.velocities = {}
     this.pointer = { x: 0, y: 0, targetX: 0, targetY: 0 }
+    this.screen = { width: 0, height: 0, pixelRatio: 0 }
     this.viewport = { width: 1, height: 1, portrait: false }
+    this.placement = { x: 0, y: 0, scale: 1 }
+    this.anchor = { x: 0, y: 0, scale: 1 }
     this.lastOpacity = -1
     this.symbolPosition = new THREE.Vector3()
     this.performance = { frames: 0, time: 0, checked: false }
@@ -31,7 +53,16 @@ export default class Experience {
     this.setScene()
     this.resize()
 
-    window.addEventListener('resize', () => this.resize())
+    // Redimensiona no máximo uma vez por frame
+    let resizeQueued = false
+    window.addEventListener('resize', () => {
+      if (resizeQueued) return
+      resizeQueued = true
+      requestAnimationFrame(() => {
+        resizeQueued = false
+        this.resize()
+      })
+    })
     window.addEventListener(
       'pointermove',
       (event) => {
@@ -79,11 +110,21 @@ export default class Experience {
     this.scene.add(this.glow.mesh)
   }
 
+  /**
+   * O canvas tem a altura da maior viewport (100lvh): no celular, a barra de endereço
+   * aparecendo/sumindo não muda o tamanho dele, então nada é realocado durante o scroll.
+   */
   resize() {
-    const width = window.innerWidth
-    const height = window.innerHeight
+    const width = this.canvas.clientWidth
+    const height = this.canvas.clientHeight
+    const pixelRatio = Math.min(window.devicePixelRatio, this.maxPixelRatio)
+    const screen = this.screen
+    if (width === screen.width && height === screen.height && pixelRatio === screen.pixelRatio) return
+    screen.width = width
+    screen.height = height
+    screen.pixelRatio = pixelRatio
 
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.maxPixelRatio))
+    this.renderer.setPixelRatio(pixelRatio)
     this.renderer.setSize(width, height, false)
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
@@ -103,40 +144,38 @@ export default class Experience {
   measureAnchor(element, fill = 0.86) {
     const rect = element.getBoundingClientRect()
     const { width, height } = this.viewport
-    return {
-      x: ((rect.left + rect.width / 2) / window.innerWidth - 0.5) * width,
-      y: (0.5 - (rect.top + rect.height / 2) / window.innerHeight) * height,
-      scale: Math.min(
-        ((rect.height / window.innerHeight) * height * fill) / this.logo.size.y,
-        this.maxScale((rect.width / window.innerWidth) * width),
-      ),
-    }
+    const screen = this.screen
+    const anchor = this.anchor
+    anchor.x = ((rect.left + rect.width / 2) / screen.width - 0.5) * width
+    anchor.y = (0.5 - (rect.top + rect.height / 2) / screen.height) * height
+    anchor.scale = Math.min(
+      ((rect.height / screen.height) * height * fill) / this.logo.size.y,
+      this.maxScale((rect.width / screen.width) * width),
+    )
+    return anchor
+  }
+
+  /** Soma ao posicionamento o peso de um elemento-âncora. */
+  addAnchor(element, weight) {
+    if (weight < 0.001 || !element) return
+    const anchor = this.measureAnchor(element)
+    this.placement.x += anchor.x * weight
+    this.placement.y += anchor.y * weight
+    this.placement.scale += anchor.scale * weight
   }
 
   /** Mistura a posição do keyframe com a dos elementos-âncora, conforme os pesos do estado. */
   resolvePlacement() {
     const s = this.smooth
     const { width, height, portrait } = this.viewport
-    const placement = {
-      x: s.x * width * (portrait ? 0 : 1),
-      y: s.y * height,
-      scale: Math.min(s.scale, this.maxScale(width)),
-    }
-    const weights = { hero: s.anchorHero, contact: s.anchorContact }
-    const total = Math.min(1, weights.hero + weights.contact)
-    if (total < 0.001) return placement
+    const placement = this.placement
+    const free = 1 - Math.min(1, s.anchorHero + s.anchorContact)
 
-    placement.x *= 1 - total
-    placement.y *= 1 - total
-    placement.scale *= 1 - total
-    Object.entries(weights).forEach(([name, weight]) => {
-      const element = this.anchors[name]
-      if (weight < 0.001 || !element) return
-      const anchor = this.measureAnchor(element)
-      placement.x += anchor.x * weight
-      placement.y += anchor.y * weight
-      placement.scale += anchor.scale * weight
-    })
+    placement.x = s.x * width * (portrait ? 0 : 1) * free
+    placement.y = s.y * height * free
+    placement.scale = Math.min(s.scale, this.maxScale(width)) * free
+    this.addAnchor(this.anchors.hero, s.anchorHero)
+    this.addAnchor(this.anchors.contact, s.anchorContact)
     return placement
   }
 
@@ -156,11 +195,14 @@ export default class Experience {
     }
   }
 
-  /** Segue o estado do GSAP com amortecimento: transições sem trancos, mesmo em scroll rápido. */
+  /** Segue o estado do GSAP com a mola: transições sem trancos, mesmo em scroll rápido. */
   updateSmooth(dt) {
-    Object.keys(this.state).forEach((key) => {
-      this.smooth[key] = key === 'reveal' ? this.state[key] : damp(this.smooth[key], this.state[key], SMOOTHING, dt)
-    })
+    const { state, smooth, velocities, smoothKeys } = this
+    for (let i = 0; i < smoothKeys.length; i++) {
+      const key = smoothKeys[i]
+      smooth[key] = smoothDamp(smooth[key], state[key], velocities, key, SMOOTH_TIME, dt)
+    }
+    smooth.reveal = state.reveal
   }
 
   update(time, delta) {
@@ -171,8 +213,8 @@ export default class Experience {
     this.updateSmooth(dt)
     const s = this.smooth
 
-    p.x = damp(p.x, p.targetX, 1.6, dt)
-    p.y = damp(p.y, p.targetY, 1.6, dt)
+    p.x = smoothDamp(p.x, p.targetX, this.velocities, 'pointerX', POINTER_SMOOTH_TIME, dt)
+    p.y = smoothDamp(p.y, p.targetY, this.velocities, 'pointerY', POINTER_SMOOTH_TIME, dt)
 
     const reveal = clamp(s.reveal, 0, 1)
     const revealEase = 1 - Math.pow(1 - reveal, 3)
@@ -189,7 +231,7 @@ export default class Experience {
       s.rotZ,
     )
 
-    this.logo.update({ split: s.split, focus: s.focus, dark: s.dark, lift: lerp(0.32, 0.18, s.dark) })
+    this.logo.update(s.split, s.focus, s.dark, lerp(0.32, 0.18, s.dark))
 
     const halfHeight = scale * this.logo.size.y * 0.6
     this.clip.constant = reveal >= 1 ? 1e4 : this.object.position.y + (reveal * 2 - 1) * halfHeight
@@ -199,16 +241,18 @@ export default class Experience {
     this.logo.symbol.getWorldPosition(this.symbolPosition)
     this.glow.mesh.position.set(this.symbolPosition.x, this.symbolPosition.y, -0.9)
     this.glow.mesh.scale.setScalar(scale * (1.1 + s.split * 0.6))
-    this.glow.update({ intensity: s.glow * revealEase, dark: s.dark })
+    this.glow.update(s.glow * revealEase, s.dark)
 
     this.light.position.set(3 + p.x * 3, 3 - p.y * 3, 5)
 
-    const opacity = s.opacity * (portrait ? lerp(0.22, 1, s.fg) : 1)
+    const opacity = clamp(s.opacity, 0, 1) * (portrait ? lerp(0.22, 1, s.fg) : 1)
     if (Math.abs(opacity - this.lastOpacity) > 0.002) {
       this.canvas.style.opacity = opacity.toFixed(3)
       this.lastOpacity = opacity
     }
 
+    // Invisível (cases e números): não desenha, liberando a GPU para as animações da página
+    if (opacity < 0.004) return
     this.renderer.render(this.scene, this.camera)
     this.monitorPerformance(delta)
   }

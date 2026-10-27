@@ -176,11 +176,10 @@ export default class Logo3D {
     this.strokes[1].mesh.renderOrder = 1
 
     // Palavras
-    this.inkMaterial = new THREE.MeshPhysicalMaterial({
+    // Sem clearcoat: as letras ocupam bastante tela, e o reflexo do ambiente já dá o brilho
+    this.inkMaterial = new THREE.MeshStandardMaterial({
       color: INK,
-      roughness: 0.3,
-      clearcoat: 1,
-      clearcoatRoughness: 0.1,
+      roughness: 0.24,
       transparent: true,
       clippingPlanes,
     })
@@ -217,21 +216,22 @@ export default class Logo3D {
    * @param {number} focus  -1 destaca o traço violeta (marketing), 1 o azul (automação)
    * @param {number} dark   0 = letras pretas (fundo branco), 1 = letras claras (fundo preto)
    */
-  update({ split, focus, dark, lift }) {
+  update(split, focus, dark, lift) {
     this.lift.value = lift
     this.content.position.set(-this.center.x * (1 - split), -this.center.y * (1 - split), 0)
 
-    this.strokes.forEach(({ mesh, material, config }) => {
+    for (let i = 0; i < this.strokes.length; i++) {
+      const { mesh, material, config } = this.strokes[i]
       const { side, z } = config
       mesh.position.set(side * split * 0.7, -side * split * 0.06, z + split * (side === -1 ? 0.5 : 0.25))
       const ghost = Math.max(0, side === -1 ? focus : -focus)
       material.opacity = 1 - ghost * 0.8
       material.depthWrite = material.opacity > 0.99
-    })
+    }
 
-    this.words.forEach(({ mesh }, i) => {
-      mesh.position.z = -split * (0.8 + i * 0.25)
-    })
+    for (let i = 0; i < this.words.length; i++) {
+      this.words[i].mesh.position.z = -split * (0.8 + i * 0.25)
+    }
     const wordOpacity = Math.pow(1 - split, 1.6)
     this.inkMaterial.opacity = wordOpacity
     this.inkMaterial.depthWrite = wordOpacity > 0.99

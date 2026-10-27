@@ -68,8 +68,11 @@ Cada seção com `data-scene="..."` no `index.html` tem um estado em `src/webgl/
 escala, orientação, qual traço fica em destaque (`focus`), halo, opacidade e se o fundo é escuro.
 
 O `SceneDirector` monta uma timeline GSAP pausada com uma transição entre cada par de seções e usa o
-progresso dos ScrollTriggers como "tempo" dessa timeline, com inércia. O `Experience` ainda suaviza esse
-estado a cada frame (`SMOOTHING`), então nada muda de forma brusca, mesmo com scroll rápido.
+progresso dos ScrollTriggers como "tempo" dessa timeline.
+
+A inércia fica num lugar só. O `Experience` segue esse estado com uma mola criticamente amortecida
+(`SMOOTH_TIME`, 0,5 s), que acelera e desacelera sem saltos de velocidade, mesmo com scroll rápido ou
+irregular. Para deixar o logo mais "pesado" ou mais ágil, ajuste esse valor.
 
 Três propriedades ficam fora da tabela:
 
@@ -106,5 +109,10 @@ Os trechos abaixo são **exemplos** e estão marcados com comentários no `index
 - **`prefers-reduced-motion`**: sem scroll suave nem revelações; a seção de processo vira uma grade.
 - **Sem WebGL**: o logo aparece em HTML/SVG no lugar da cena 3D.
 - **Aparelhos lentos**: se a cena não sustentar cerca de 40 fps, a resolução do 3D é reduzida automaticamente.
+- **Fluidez**: o 3D não é desenhado enquanto está invisível (cases e números), e o loop não aloca memória a
+  cada frame (evita pausas do coletor de lixo).
+- **Celular**: o canvas e o fundo preto têm a altura da maior viewport (`100lvh`), então a barra de endereço
+  não força redimensionamentos durante o scroll. O fundo preto do contato se move só com `transform`, sem
+  repintar a tela, e o desfoque da navegação é mais leve.
 - O three.js é carregado num chunk separado; o texto do hero aparece antes, e o logo entra quando a
   cena fica pronta.

@@ -118,21 +118,30 @@ button {
    Camadas fixas: fundo escuro (seção de contato) e canvas WebGL
    -------------------------------------------------------------------------- */
 
+/* As duas camadas têm a altura da maior viewport (lvh): no celular, a barra de
+   endereço aparecendo/sumindo não as redimensiona durante o scroll */
 .backdrop {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
   background: var(--dark);
-  clip-path: inset(100% 0 0 0);
+  transform: translate3d(0, 100vh, 0);
+  will-change: transform;
   pointer-events: none;
 }
 
 .webgl {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 1;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  height: 100lvh;
   display: block;
   pointer-events: none;
 }
@@ -307,6 +316,19 @@ button {
 .nav--dark {
   background: rgba(22, 22, 23, 0.72);
   color: var(--dark-ink);
+}
+
+/* No celular o desfoque é recalculado a cada frame sobre o 3D; um raio menor custa bem menos */
+@media (pointer: coarse) {
+  .nav {
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+  }
+
+  .nav--dark {
+    background: rgba(22, 22, 23, 0.84);
+  }
 }
 
 .nav--dark::after {
@@ -863,11 +885,12 @@ button {
   background: var(--tile);
   overflow: hidden;
   isolation: isolate;
-  transition: transform 0.6s var(--ease-out);
+  transition: scale 0.6s var(--ease-out);
 }
 
+/* `scale` (e não `transform`) para não brigar com o transform que o GSAP aplica na entrada */
 .tile:hover {
-  transform: scale(1.012);
+  scale: 1.012;
 }
 
 .tile--wide {

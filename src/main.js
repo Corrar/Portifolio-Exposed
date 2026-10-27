@@ -47,7 +47,6 @@ class App {
     this.director = new SceneDirector({
       state: this.state,
       sections: [...document.querySelectorAll('[data-scene]')],
-      reducedMotion: this.reducedMotion,
     })
 
     ScrollTrigger.refresh()

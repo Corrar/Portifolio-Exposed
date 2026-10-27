@@ -55,7 +55,7 @@ export default class Glow {
     this.mesh.renderOrder = -1
   }
 
-  update({ intensity, dark }) {
+  update(intensity, dark) {
     this.uniforms.uIntensity.value = intensity * (0.85 + dark * 0.15)
     this.uniforms.uColorA.value.lerpColors(this.light.a, this.dark.a, dark)
     this.uniforms.uColorB.value.lerpColors(this.light.b, this.dark.b, dark)

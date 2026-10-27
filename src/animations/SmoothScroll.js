@@ -1,3 +1,4 @@
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollSmoother } from 'gsap/ScrollSmoother'
 
 /** Scroll suave (GSAP ScrollSmoother) + navegação por âncoras. */
@@ -8,8 +9,10 @@ export default class SmoothScroll {
       : ScrollSmoother.create({
           wrapper: '#smooth-wrapper',
           content: '#smooth-content',
-          smooth: 1.4,
+          smooth: 1.2,
           smoothTouch: 0.1,
+          // No toque, o scroll roda na mesma thread das animações: sem tremidas nas seções fixadas
+          normalizeScroll: ScrollTrigger.isTouch === 1,
           effects: true,
         })
 
