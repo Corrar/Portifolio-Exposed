@@ -1,19 +1,19 @@
 /**
- * Estado do símbolo 3D em cada seção marcada com [data-scene].
+ * Estado da ampulheta 3D em cada seção marcada com [data-scene].
  * Entre uma seção e outra, o SceneDirector interpola os valores com GSAP.
  *
  * x / y     → posição relativa à área visível (-0.5 … 0.5)
- * scale     → escala do símbolo
+ * scale     → escala da ampulheta
  * rotX/Y/Z  → orientação (radianos)
- * focus     → -1 destaca o traço violeta (marketing), 1 o azul (automação)
+ * focus     → -1 destaca a metade violeta (marketing), 1 a azul (automação)
  * glow      → intensidade do halo
  * opacity   → visibilidade geral
  * dark      → 0 = fundo branco, 1 = fundo preto (ajusta o halo)
- * fg        → 1 quando o símbolo é o protagonista (no celular, os demais ficam mais discretos)
- * anchorHero / anchorContact → 1 = o símbolo acompanha o espaço reservado (.stage) da
+ * fg        → 1 quando a ampulheta é a protagonista (no celular, as demais ficam mais discretas)
+ * anchorHero / anchorContact → 1 = a ampulheta acompanha o espaço reservado (.stage) da
  *             seção, em vez de usar x/y/scale; assim ele rola junto com a página
  *
- * `split` (separação dos traços), `orbit` (giro extra) e `reveal` (entrada)
+ * `split` (separação das metades), `orbit` (giro extra) e `reveal` (entrada)
  * são animados por ScrollTriggers próprios, fora desta tabela.
  */
 export const KEYFRAMES = {
@@ -30,7 +30,7 @@ export const KEYFRAMES = {
     anchorHero: 0, anchorContact: 0,
   },
   manifesto: {
-    x: 0.4, y: 0.24, scale: 0.42,
+    x: 0.43, y: 0.28, scale: 0.42,
     rotX: 0.25, rotY: 0.9, rotZ: -0.2,
     focus: 0, glow: 0.35, opacity: 1, dark: 0, fg: 0,
     anchorHero: 0, anchorContact: 0,

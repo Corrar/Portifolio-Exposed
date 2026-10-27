@@ -22,8 +22,8 @@ export default class SectionAnimations {
   }
 
   /**
-   * "Duas forças": a seção fica fixada enquanto os dois traços do símbolo se
-   * separam (marketing × automação) e depois se reencontram girando.
+   * "Duas forças": a seção fica fixada enquanto as duas metades da ampulheta se
+   * separam (marketing × automação) e depois se reencontram com um quarto de volta.
    */
   setForces() {
     const section = document.querySelector('.forces')
@@ -36,25 +36,25 @@ export default class SectionAnimations {
 
     gsap
       .timeline({
-        defaults: { ease: 'power2.inOut' },
+        defaults: { ease: 'sine.inOut' },
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: '+=220%',
+          end: '+=240%',
           pin: true,
-          scrub: 0.8,
+          scrub: 1.5,
           refreshPriority: 2,
         },
       })
       .fromTo(titleA, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0)
-      .fromTo(this.state, { split: 0 }, { split: 1, duration: 1, immediateRender: false }, 0.2)
-      .fromTo(left, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5 }, 0.6)
-      .fromTo(right, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.5 }, 0.7)
-      .to([left, right], { opacity: 0, duration: 0.4 }, 1.8)
-      .to(titleA, { opacity: 0, y: -30, duration: 0.4 }, 1.8)
-      .to(this.state, { split: 0, duration: 1 }, 1.9)
-      .fromTo(this.state, { orbit: 0 }, { orbit: Math.PI * 2, duration: 1.1, immediateRender: false }, 1.9)
-      .fromTo(titleB, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 2.3)
+      .fromTo(this.state, { split: 0 }, { split: 1, duration: 1.2, immediateRender: false }, 0.2)
+      .fromTo(left, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6 }, 0.7)
+      .fromTo(right, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.6 }, 0.8)
+      .to([left, right], { opacity: 0, duration: 0.5 }, 1.9)
+      .to(titleA, { opacity: 0, y: -20, duration: 0.5 }, 1.9)
+      .to(this.state, { split: 0, duration: 1.2 }, 2)
+      .fromTo(this.state, { orbit: 0 }, { orbit: Math.PI / 2, duration: 1.2, immediateRender: false }, 2)
+      .fromTo(titleB, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 2.5)
       .to({}, { duration: 0.3 })
   }
 
@@ -89,9 +89,9 @@ export default class SectionAnimations {
 
     gsap.fromTo(
       this.state,
-      { orbit: Math.PI * 2 },
+      { orbit: Math.PI / 2 },
       {
-        orbit: Math.PI * 4,
+        orbit: Math.PI,
         ease: 'none',
         immediateRender: false,
         scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance()}`, scrub: 1.2 },
@@ -202,7 +202,7 @@ export default class SectionAnimations {
 
   /**
    * Contato: um fundo preto fixo (atrás do canvas) acompanha a seção, então o
-   * símbolo 3D aparece sobre o preto. A navegação fica escura por cima dela.
+   * a ampulheta 3D aparece sobre o preto. A navegação fica escura por cima dela.
    */
   setContact() {
     const contact = document.querySelector('.contact')

@@ -29,7 +29,7 @@ const fragmentShader = /* glsl */ `
   }
 `
 
-/** Brilho difuso atrás do símbolo (o halo lilás do logo). */
+/** Brilho difuso atrás da ampulheta (o halo lilás do logo). */
 export default class Glow {
   constructor() {
     this.light = { a: new THREE.Color('#d8c0ff'), b: new THREE.Color('#bdeaf7') }

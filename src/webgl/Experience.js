@@ -1,23 +1,25 @@
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import LogoMark from './LogoMark.js'
+import Hourglass from './Hourglass.js'
 import Glow from './Glow.js'
 import { KEYFRAMES } from './keyframes.js'
 
-const OBJECT_WIDTH = 2.6 // largura útil (com os traços separados) em unidades de cena
+const OBJECT_WIDTH = 2.6 // largura útil (com as metades separadas) em unidades de cena
+const SMOOTHING = 3.2 // quanto maior, mais rápido o objeto alcança o estado animado pelo GSAP
 
 const { damp, clamp, lerp } = THREE.MathUtils
 
 /**
  * Experiência three.js: renderer transparente sobre o fundo da página,
- * o símbolo 3D, o halo e o loop. O estado (`this.state`) é animado pelo GSAP
- * e lido aqui a cada frame.
+ * a ampulheta 3D, o halo e o loop. O estado (`this.state`) é animado pelo GSAP;
+ * aqui ele é suavizado mais uma vez (`this.smooth`) e aplicado a cada frame.
  */
 export default class Experience {
   constructor({ canvas, state, anchors = {} }) {
     this.canvas = canvas
     this.anchors = anchors
     this.state = state ?? { ...KEYFRAMES.hero, split: 0, orbit: 0, reveal: 1 }
+    this.smooth = { ...this.state }
     this.pointer = { x: 0, y: 0, targetX: 0, targetY: 0 }
     this.viewport = { width: 1, height: 1, fit: 1, portrait: false }
     this.lastOpacity = -1
@@ -62,12 +64,12 @@ export default class Experience {
     this.light.position.set(3, 3, 5)
     this.scene.add(this.light)
 
-    // Plano de corte que "revela" o símbolo de baixo para cima na entrada
+    // Plano de corte que "revela" a ampulheta de baixo para cima na entrada
     this.clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)
 
     this.object = new THREE.Group()
-    this.logo = new LogoMark({ clippingPlanes: [this.clip] })
-    this.object.add(this.logo.group)
+    this.hourglass = new Hourglass({ clippingPlanes: [this.clip] })
+    this.object.add(this.hourglass.group)
     this.scene.add(this.object)
 
     this.glow = new Glow()
@@ -90,7 +92,7 @@ export default class Experience {
     this.viewport.portrait = width / height < 0.9
   }
 
-  /** Posição e escala (em unidades de cena) que encaixam o símbolo num elemento da página. */
+  /** Posição e escala (em unidades de cena) que encaixam a ampulheta num elemento da página. */
   measureAnchor(element, fill = 0.9) {
     const rect = element.getBoundingClientRect()
     const { width, height } = this.viewport
@@ -103,7 +105,7 @@ export default class Experience {
 
   /** Mistura a posição do keyframe com a dos elementos-âncora, conforme os pesos do estado. */
   resolvePlacement() {
-    const s = this.state
+    const s = this.smooth
     const { width, height, fit, portrait } = this.viewport
     const placement = { x: s.x * width * (portrait ? 0 : 1), y: s.y * height, scale: s.scale * fit }
     const weights = { hero: s.anchorHero, contact: s.anchorContact }
@@ -124,31 +126,44 @@ export default class Experience {
     return placement
   }
 
+  /** Segue o estado do GSAP com amortecimento: transições sem trancos, mesmo em scroll rápido. */
+  updateSmooth(dt) {
+    Object.keys(this.state).forEach((key) => {
+      this.smooth[key] = key === 'reveal' ? this.state[key] : damp(this.smooth[key], this.state[key], SMOOTHING, dt)
+    })
+  }
+
   update(time, delta) {
-    const s = this.state
     const p = this.pointer
     const { width, portrait } = this.viewport
     const dt = Math.min(delta, 0.1)
 
-    p.x = damp(p.x, p.targetX, 2.5, dt)
-    p.y = damp(p.y, p.targetY, 2.5, dt)
+    this.updateSmooth(dt)
+    const s = this.smooth
+
+    p.x = damp(p.x, p.targetX, 1.6, dt)
+    p.y = damp(p.y, p.targetY, 1.6, dt)
 
     const reveal = clamp(s.reveal, 0, 1)
     const revealEase = 1 - Math.pow(1 - reveal, 3)
     const placement = this.resolvePlacement()
     const scale = Math.max(0.0001, placement.scale)
 
-    this.object.position.set(placement.x + p.x * 0.05, placement.y + Math.sin(time * 0.8) * 0.025, 0)
+    this.object.position.set(placement.x + p.x * 0.04, placement.y + Math.sin(time * 0.7) * 0.02, 0)
     this.object.scale.setScalar(scale * (0.92 + 0.08 * revealEase))
-    this.object.rotation.set(
-      s.rotX - p.y * 0.12 + Math.sin(time * 0.6) * 0.025,
-      s.rotY + s.orbit + p.x * 0.2 + Math.sin(time * 0.45) * 0.07 - (1 - revealEase) * 0.6,
-      s.rotZ,
-    )
 
-    // Afastamento dos traços limitado pela largura da tela
-    const distance = Math.min(0.95, (width * 0.3) / scale)
-    this.logo.update({ split: s.split, distance, focus: s.focus, lift: lerp(0.32, 0.18, s.dark) })
+    // O grupo só inclina; o giro (lento e contínuo, como numa vitrine) fica em cada metade
+    this.object.rotation.set(s.rotX - p.y * 0.08 + Math.sin(time * 0.5) * 0.015, p.x * 0.1, s.rotZ)
+
+    // Afastamento das metades limitado pela largura da tela
+    const distance = Math.min(0.85, (width * 0.28) / scale)
+    this.hourglass.update({
+      split: s.split,
+      distance,
+      spin: s.rotY + s.orbit + time * 0.1 + p.x * 0.1 - (1 - revealEase) * 0.5,
+      focus: s.focus,
+      lift: lerp(0.32, 0.18, s.dark),
+    })
 
     this.clip.constant = reveal >= 1 ? 1e4 : this.object.position.y + (reveal * 2 - 1) * scale * 1.45
 

@@ -40,6 +40,11 @@
           <stop offset="0" stop-color="#9a60ee" />
           <stop offset="1" stop-color="#2bb8e0" />
         </linearGradient>
+        <!-- Ampulheta (fallback da cena 3D) -->
+        <symbol id="ev-hourglass" viewBox="0 0 63 120">
+          <polygon points="6,4 57,4 31.5,60" stroke="url(#ev-violet)" vector-effect="non-scaling-stroke" />
+          <polygon points="6,116 57,116 31.5,60" stroke="url(#ev-blue)" vector-effect="non-scaling-stroke" />
+        </symbol>
         <symbol id="ev-mark" viewBox="0 0 63 120">
           <polyline points="56,4 4,4 51.5,85.4 58.7,73.7" stroke="url(#ev-violet)" vector-effect="non-scaling-stroke" />
           <polyline points="57,116 4,116 51.5,34.5 58.7,46.1" stroke="url(#ev-blue)" vector-effect="non-scaling-stroke" />
@@ -103,7 +108,7 @@
               </div>
             </div>
             <div class="stage" aria-hidden="true">
-              <svg class="stage__fallback"><use href="#ev-mark" /></svg>
+              <svg class="stage__fallback"><use href="#ev-hourglass" /></svg>
             </div>
           </section>
 
@@ -350,7 +355,7 @@
               <p class="intro" data-reveal>Conte sobre o seu projeto. Respondemos em até 24 horas úteis.</p>
             </div>
             <div class="stage stage--small" aria-hidden="true">
-              <svg class="stage__fallback"><use href="#ev-mark" /></svg>
+              <svg class="stage__fallback"><use href="#ev-hourglass" /></svg>
             </div>
             <div class="contact__actions" data-reveal>
               <div class="actions">

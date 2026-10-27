@@ -23,7 +23,7 @@ export default class SceneDirector {
       this.timeline.fromTo(
         state,
         { ...frames[i - 1] },
-        { ...frames[i], duration: 1, ease: 'power2.inOut', immediateRender: false },
+        { ...frames[i], duration: 1, ease: 'sine.inOut', immediateRender: false },
         i - 1,
       )
     }
@@ -51,6 +51,6 @@ export default class SceneDirector {
       return
     }
 
-    gsap.to(this.timeline, { time, duration: 1.2, ease: 'power3.out', overwrite: true })
+    gsap.to(this.timeline, { time, duration: 1.8, ease: 'power2.out', overwrite: true })
   }
 }
